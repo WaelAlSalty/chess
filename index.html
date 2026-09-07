@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Xadrez Real 3D - Duelo com a Princesa</title>
+  
+  <!-- Three.js (Motor 3D) e OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- PeerJS (Conexão P2P Realtime) -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+  <style>
+    :root {
+      --gold: #f5cd79;
+      --gold-dark: #d35400;
+      --pearl: #fdfbf7;
+      --obsidian: #1e272e;
+      --bg-dark: #0a080c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #1b1420, var(--bg-dark));
+      color: #fff;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Lobby e Menus Nobres */
+    .card {
+      background: rgba(22, 16, 28, 0.92);
+      border: 1px solid rgba(245, 205, 121, 0.35);
+      backdrop-filter: blur(16px);
+      border-radius: 28px;
+      padding: 34px;
+      width: 90%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(245, 205, 121, 0.15);
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #fff, var(--gold), #e17055);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    p.subtitle {
+      font-size: 0.95rem;
+      color: #dcdde1;
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: var(--gold);
+      margin-bottom: 6px;
+      display: block;
+      letter-spacing: 1px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(245, 205, 121, 0.3);
+      background: rgba(10, 6, 14, 0.7);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 10px rgba(245, 205, 121, 0.3);
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 800;
+      font-size: 1.05rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      letter-spacing: 1px;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #f5cd79, #e67e22);
+      color: #1a0f00;
+      box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+    }
+
+    .btn-dark {
+      background: linear-gradient(135deg, #2d1b38, #160c1d);
+      color: var(--gold);
+      border: 1px solid rgba(245, 205, 121, 0.4);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .room-code-tag {
+      font-family: monospace;
+      font-size: 1.6rem;
+      letter-spacing: 4px;
+      background: #0d0912;
+      color: var(--gold);
+      padding: 14px;
+      border-radius: 12px;
+      margin: 18px 0;
+      border: 2px dashed rgba(245, 205, 121, 0.4);
+    }
+
+    /* HUD e Controles Durante o Jogo */
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .hud-header {
+      position: absolute;
+      top: 16px;
+      width: 90%;
+      max-width: 600px;
+      background: rgba(22, 16, 28, 0.85);
+      border: 1px solid rgba(245, 205, 121, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 10px 20px;
+      border-radius: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    .player-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .piece-icon-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px rgba(255,255,255,0.4);
+    }
+
+    .piece-icon-circle.white {
+      background: radial-gradient(circle at 35% 35%, #ffffff, #f8a5c2);
+      border: 1px solid #fff;
+    }
+
+    .piece-icon-circle.black {
+      background: radial-gradient(circle at 35% 35%, #4b4b4b, #000000);
+      border: 1px solid var(--gold);
+    }
+
+    .hud-header .active-turn {
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(245, 205, 121, 0.6);
+    }
+
+    .turn-alert {
+      position: absolute;
+      bottom: 20px;
+      background: rgba(22, 16, 28, 0.85);
+      border: 1px solid rgba(245, 205, 121, 0.3);
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      color: #fff;
+      font-weight: bold;
+      z-index: 10;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      letter-spacing: 1px;
+    }
+
+    /* Modal de Vitória / Xeque-Mate */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-card {
+      background: rgba(24, 17, 30, 0.98);
+      border: 2px solid var(--gold);
+      border-radius: 28px;
+      padding: 34px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 0 60px rgba(245, 205, 121, 0.35);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TELA 1: LOBBY -->
+  <div id="screen-lobby" class="screen active">
+    <div class="card">
+      <h1>XADREZ REAL 3D</h1>
+      <p class="subtitle">Um duelo nobre para jogar com a sua princesa.</p>
+
+      <div class="form-group">
+        <label>Seu Nome ou Apelido</label>
+        <input type="text" id="player-name" placeholder="Ex: Meu Rei / Princesa" value="Príncipe">
+      </div>
+
+      <button class="btn-gold" onclick="startHost()">Criar Duelo (Peças Brancas / Pérola)</button>
+
+      <div style="margin: 20px 0; color: #7f8c8d; font-size: 0.8rem; letter-spacing: 2px; font-weight: bold;">OU ENTRAR NA SALA</div>
+
+      <div class="form-group">
+        <label>Código da Sala</label>
+        <input type="text" id="join-code" placeholder="Cole o código aqui">
+      </div>
+
+      <button class="btn-dark" onclick="joinHost()">Entrar no Duelo (Peças Pretas / Ônix)</button>
+    </div>
+  </div>
+
+  <!-- TELA 2: SALA DE ESPERA -->
+  <div id="screen-waiting" class="screen">
+    <div class="card">
+      <h2>Sala Criada!</h2>
+      <p style="margin-top: 10px; font-size: 0.9rem; color: #dcdde1;">Envie este código para ela conectar no celular ou PC:</p>
+      <div class="room-code-tag" id="display-code">...</div>
+      <p style="font-size: 0.85rem; color: #a4b0be; font-style: italic;">O tabuleiro 3D abrirá assim que ela entrar!</p>
+    </div>
+  </div>
+
+  <!-- TELA 3: CAMPO DE BATALHA 3D -->
+  <div id="screen-game" class="screen">
+    <div id="canvas-container"></div>
+
+    <div class="hud-header">
+      <div class="player-pill" id="pill-white">
+        <span class="piece-icon-circle white"></span>
+        <span id="name-white">Brancas</span>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--gold); letter-spacing: 2px;">• 3D DUEL •</div>
+      <div class="player-pill" id="pill-black">
+        <span class="piece-icon-circle black"></span>
+        <span id="name-black">Pretas</span>
+      </div>
+    </div>
+
+    <div class="turn-alert" id="status-turn">Aguardando início...</div>
+  </div>
+
+  <!-- MODAL DE FINAL DE PARTIDA -->
+  <div class="modal-overlay" id="modal-victory">
+    <div class="modal-card">
+      <h2 id="winner-title" style="color: var(--gold); font-size: 2.2rem; margin-bottom: 12px;">XEQUE-MATE!</h2>
+      <p id="winner-desc" style="color: #eee; margin-bottom: 26px; font-size: 1.05rem; line-height: 1.4;">Uma vitória majestosa e inesquecível.</p>
+      <button class="btn-gold" onclick="restartMatch()">Jogar Mais Uma Partida</button>
+    </div>
+  </div>
+
+  <script>
+    // Sintetizador de Áudio Nobre (Web Audio API)
+    class ChessAudio {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playMove() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.15);
+      }
+      playCapture() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.22);
+        gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.22);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.22);
+      }
+      playVictory() {
+        this.init();
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.12);
+          gain.gain.setValueAtTime(0.3, this.ctx.currentTime + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.12 + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.12);
+          osc.stop(this.ctx.currentTime + idx * 0.12 + 0.4);
+        });
+      }
+    }
+    const sfx = new ChessAudio();
+
+    // Rede WebRTC P2P
+    let peer = null;
+    let conn = null;
+    let isHost = false;
+    let myColor = 'w'; // 'w' (Brancas/Pérola) ou 'b' (Pretas/Obsidiana)
+    let myName = "Jogador 1";
+    let oppName = "Jogador 2";
+
+    // Estado Lógico do Xadrez (8x8)
+    // Coordenadas: r (linha 0 a 7), c (coluna 0 a 7)
+    // Linha 0 = Peças Pretas principais, Linha 1 = Peões Pretos
+    // Linha 6 = Peões Brancos, Linha 7 = Peças Brancas principais
+    let boardState = [];
+    let currentTurn = 'w'; // Brancas sempre começam
+    let selectedSquare = null;
+    let validMoves = [];
+
+    // Motor 3D Three.js
+    let scene, camera, renderer, controls;
+    let boardMeshGroup, piecesMeshGroup, highlightGroup;
+    let raycaster, mouse;
+
+    function switchScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // ================= REDE P2P / PEERJS =================
+    function startHost() {
+      sfx.init();
+      myName = document.getElementById('player-name').value.trim() || 'Príncipe';
+      isHost = true;
+      myColor = 'w';
+
+      const codeSuffix = Math.floor(1000 + Math.random() * 9000);
+      const roomId = `xadrez-${codeSuffix}`;
+
+      peer = new Peer(roomId);
+
+      peer.on('open', (id) => {
+        document.getElementById('display-code').innerText = id;
+        switchScreen('screen-waiting');
+      });
+
+      peer.on('connection', (c) => {
+        conn = c;
+        setupConnection();
+      });
+
+      peer.on('error', () => alert("Erro ao criar sala. Tente novamente."));
+    }
+
+    function joinHost() {
+      sfx.init();
+      myName = document.getElementById('player-name').value.trim() || 'Princesa';
+      isHost = false;
+      myColor = 'b';
+
+      const code = document.getElementById('join-code').value.trim();
+      if (!code) return alert("Digite o código da sala!");
+
+      peer = new Peer();
+
+      peer.on('open', () => {
+        conn = peer.connect(code);
+        setupConnection();
+      });
+
+      peer.on('error', () => alert("Não foi possível conectar. Confira o código da sala."));
+    }
+
+    function setupConnection() {
+      conn.on('open', () => {
+        switchScreen('screen-game');
+        document.getElementById('modal-victory').style.display = 'none';
+
+        initThreeJS();
+
+        if (isHost) {
+          conn.send({ type: 'HANDSHAKE', name: myName });
+          initBoardState();
+        } else {
+          conn.send({ type: 'HANDSHAKE', name: myName });
+        }
+      });
+
+      conn.on('data', (data) => {
+        if (data.type === 'HANDSHAKE') {
+          oppName = data.name;
+          if (isHost) {
+            conn.send({ type: 'SYNC_NAMES', hostName: myName, clientName: oppName });
+            broadcastState();
+          }
+          updatePlayerLabels();
+        } else if (data.type === 'SYNC_NAMES') {
+          oppName = data.hostName;
+          updatePlayerLabels();
+        } else if (data.type === 'STATE_SYNC') {
+          boardState = data.board;
+          currentTurn = data.turn;
+          if (data.action === 'move') sfx.playMove();
+          if (data.action === 'capture') sfx.playCapture();
+          update3DPieces();
+          updateHUD();
+          checkGameOver();
+        } else if (data.type === 'RESTART') {
+          initBoardState();
+        }
+      });
+
+      conn.on('close', () => {
+        alert("A conexão com o oponente foi perdida!");
+        location.reload();
+      });
+    }
+
+    function updatePlayerLabels() {
+      if (myColor === 'w') {
+        document.getElementById('name-white').innerText = `${myName} (Você)`;
+        document.getElementById('name-black').innerText = oppName;
+      } else {
+        document.getElementById('name-white').innerText = oppName;
+        document.getElementById('name-black').innerText = `${myName} (Você)`;
+      }
+    }
+
+    // ================= LÓGICA DO TABULEIRO DE XADREZ =================
+    function initBoardState() {
+      boardState = Array(8).fill(null).map(() => Array(8).fill(null));
+
+      // Ordem clássica das peças principais
+      const backRank = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
+
+      for (let c = 0; c < 8; c++) {
+        // Pretas (Topo)
+        boardState[0][c] = { type: backRank[c], color: 'b' };
+        boardState[1][c] = { type: 'P', color: 'b' };
+
+        // Brancas (Base)
+        boardState[6][c] = { type: 'P', color: 'w' };
+        boardState[7][c] = { type: backRank[c], color: 'w' };
+      }
+
+      currentTurn = 'w';
+      selectedSquare = null;
+      validMoves = [];
+
+      document.getElementById('modal-victory').style.display = 'none';
+
+      broadcastState();
+      update3DPieces();
+      updateHUD();
+    }
+
+    function broadcastState(actionType = null) {
+      if (!isHost || !conn || !conn.open) return;
+      conn.send({
+        type: 'STATE_SYNC',
+        board: boardState,
+        turn: currentTurn,
+        action: actionType
+      });
+      update3DPieces();
+      updateHUD();
+      checkGameOver();
+    }
+
+    // Validação de Movimentos de Xadrez
+    function getPieceValidMoves(r, c) {
+      const piece = boardState[r][c];
+      if (!piece) return [];
+
+      const moves = [];
+      const color = piece.color;
+      const enemy = color === 'w' ? 'b' : 'w';
+
+      function isInside(row, col) { return row >= 0 && row < 8 && col >= 0 && col < 8; }
+
+      // 1. PEÃO
+      if (piece.type === 'P') {
+        const dir = color === 'w' ? -1 : 1;
+        const startRow = color === 'w' ? 6 : 1;
+
+        // Avanço de 1 casa
+        if (isInside(r + dir, c) && !boardState[r + dir][c]) {
+          moves.push({ r: r + dir, c: c });
+          // Avanço duplo inicial
+          if (r === startRow && !boardState[r + dir * 2][c]) {
+            moves.push({ r: r + dir * 2, c: c });
+          }
+        }
+
+        // Captura nas diagonais
+        [-1, 1].forEach(dc => {
+          const nr = r + dir;
+          const nc = c + dc;
+          if (isInside(nr, nc) && boardState[nr][nc] && boardState[nr][nc].color === enemy) {
+            moves.push({ r: nr, c: nc });
+          }
+        });
+      }
+
+      // Linhas retas e diagonais para Torre, Bispo e Rainha
+      function addLineMoves(directions) {
+        directions.forEach(([dr, dc]) => {
+          let step = 1;
+          while (true) {
+            const nr = r + dr * step;
+            const nc = c + dc * step;
+            if (!isInside(nr, nc)) break;
+
+            const target = boardState[nr][nc];
+            if (!target) {
+              moves.push({ r: nr, c: nc });
+            } else {
+              if (target.color === enemy) moves.push({ r: nr, c: nc });
+              break;
+            }
+            step++;
+          }
+        });
+      }
+
+      // 2. TORRE
+      if (piece.type === 'R') {
+        addLineMoves([[-1, 0], [1, 0], [0, -1], [0, 1]]);
+      }
+
+      // 3. BISPO
+      if (piece.type === 'B') {
+        addLineMoves([[-1, -1], [-1, 1], [1, -1], [1, 1]]);
+      }
+
+      // 4. RAINHA
+      if (piece.type === 'Q') {
+        addLineMoves([[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]]);
+      }
+
+      // 5. CAVALO (Salto em L)
+      if (piece.type === 'N') {
+        const jumps = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+        jumps.forEach(([dr, dc]) => {
+          const nr = r + dr;
+          const nc = c + dc;
+          if (isInside(nr, nc)) {
+            const target = boardState[nr][nc];
+            if (!target || target.color === enemy) moves.push({ r: nr, c: nc });
+          }
+        });
+      }
+
+      // 6. REI
+      if (piece.type === 'K') {
+        const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]];
+        dirs.forEach(([dr, dc]) => {
+          const nr = r + dr;
+          const nc = c + dc;
+          if (isInside(nr, nc)) {
+            const target = boardState[nr][nc];
+            if (!target || target.color === enemy) moves.push({ r: nr, c: nc });
+          }
+        });
+      }
+
+      return moves;
+    }
+
+    function executeChessMove(from, to) {
+      const piece = boardState[from.r][from.c];
+      const target = boardState[to.r][to.c];
+      const isCapture = (target !== null);
+
+      boardState[to.r][to.c] = piece;
+      boardState[from.r][from.c] = null;
+
+      // Promoção simples do peão para Rainha ao atingir a última fileira
+      if (piece.type === 'P') {
+        if ((piece.color === 'w' && to.r === 0) || (piece.color === 'b' && to.r === 7)) {
+          piece.type = 'Q';
+        }
+      }
+
+      currentTurn = (currentTurn === 'w') ? 'b' : 'w';
+      selectedSquare = null;
+      validMoves = [];
+      clearHighlights();
+
+      const action = isCapture ? 'capture' : 'move';
+      if (action === 'capture') sfx.playCapture();
+      else sfx.playMove();
+
+      if (isHost) {
+        broadcastState(action);
+      } else {
+        conn.send({
+          type: 'STATE_SYNC',
+          board: boardState,
+          turn: currentTurn,
+          action: action
+        });
+        update3DPieces();
+        updateHUD();
+        checkGameOver();
+      }
+    }
+
+    function checkGameOver() {
+      let whiteKing = false;
+      let blackKing = false;
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = boardState[r][c];
+          if (p && p.type === 'K') {
+            if (p.color === 'w') whiteKing = true;
+            if (p.color === 'b') blackKing = true;
+          }
+        }
+      }
+
+      if (!whiteKing || !blackKing) {
+        sfx.playVictory();
+        const winner = whiteKing ? 'w' : 'b';
+        const isMe = (winner === myColor);
+
+        document.getElementById('winner-title').innerText = isMe ? "XEQUE-MATE! VOCÊ VENCEU! 👑" : "XEQUE-MATE!";
+        document.getElementById('winner-desc').innerText = isMe
+          ? "Sua majestade triunfou com maestria nesta batalha."
+          : "O adversário capturou seu Rei. Que tal uma revanche real?";
+
+        document.getElementById('modal-victory').style.display = 'flex';
+      }
+    }
+
+    function restartMatch() {
+      if (isHost) {
+        initBoardState();
+        conn.send({ type: 'RESTART' });
+      } else {
+        conn.send({ type: 'RESTART' });
+      }
+    }
+
+    function updateHUD() {
+      const isMyTurn = (currentTurn === myColor);
+      const alertEl = document.getElementById('status-turn');
+
+      document.getElementById('pill-white').classList.toggle('active-turn', currentTurn === 'w');
+      document.getElementById('pill-black').classList.toggle('active-turn', currentTurn === 'b');
+
+      if (isMyTurn) {
+        alertEl.innerText = "Sua vez de jogar! Toque na peça para ver os movimentos.";
+        alertEl.style.color = "#f5cd79";
+      } else {
+        alertEl.innerText = "Aguardando o movimento do oponente...";
+        alertEl.style.color = "#a4b0be";
+      }
+    }
+
+    // ================= MOTOR GRÁFICO 3D (THREE.JS) =================
+    function initThreeJS() {
+      const container = document.getElementById('canvas-container');
+      container.innerHTML = '';
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a080c);
+      scene.fog = new THREE.FogExp2(0x0a080c, 0.035);
+
+      camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+      // Posiciona a câmera do lado correto de cada jogador
+      if (myColor === 'w') {
+        camera.position.set(0, 18, 22);
+      } else {
+        camera.position.set(0, 18, -22);
+      }
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2.1;
+      controls.minDistance = 12;
+      controls.maxDistance = 35;
+      controls.target.set(0, 0, 0);
+
+      // Iluminação de Estúdio de Luxo
+      const ambientLight = new THREE.AmbientLight(0xfff5ea, 0.7);
+      scene.add(ambientLight);
+
+      const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      mainLight.position.set(10, 25, 12);
+      mainLight.castShadow = true;
+      mainLight.shadow.mapSize.width = 2048;
+      mainLight.shadow.mapSize.height = 2048;
+      mainLight.shadow.bias = -0.0005;
+      scene.add(mainLight);
+
+      const softRimLight = new THREE.DirectionalLight(0xf5cd79, 0.6);
+      softRimLight.position.set(-15, 10, -15);
+      scene.add(softRimLight);
+
+      // Grupos
+      boardMeshGroup = new THREE.Group();
+      piecesMeshGroup = new THREE.Group();
+      highlightGroup = new THREE.Group();
+      scene.add(boardMeshGroup);
+      scene.add(piecesMeshGroup);
+      scene.add(highlightGroup);
+
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
+      build3DBoard();
+
+      window.addEventListener('resize', onWindowResize);
+      container.addEventListener('pointerdown', onPointerDown);
+
+      animate();
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Construção do Tabuleiro 3D em Mármore Nobre
+    function build3DBoard() {
+      // Base de Mogno Escuro Chanfrada
+      const baseGeo = new THREE.BoxGeometry(17.8, 0.8, 17.8);
+      const baseMat = new THREE.MeshStandardMaterial({
+        color: 0x1f1108,
+        roughness: 0.35,
+        metalness: 0.2
+      });
+      const boardBase = new THREE.Mesh(baseGeo, baseMat);
+      boardBase.position.y = -0.4;
+      boardBase.receiveShadow = true;
+      boardMeshGroup.add(boardBase);
+
+      // Moldura Dourada Nobre
+      const goldTrimGeo = new THREE.BoxGeometry(16.5, 0.85, 16.5);
+      const goldTrimMat = new THREE.MeshStandardMaterial({
+        color: 0xd4af37,
+        roughness: 0.25,
+        metalness: 0.85
+      });
+      const goldTrim = new THREE.Mesh(goldTrimGeo, goldTrimMat);
+      goldTrim.position.y = -0.38;
+      boardMeshGroup.add(goldTrim);
+
+      // Casas em Mármore Pérola / Ônix
+      const squareGeo = new THREE.BoxGeometry(1.95, 0.2, 1.95);
+
+      const lightMat = new THREE.MeshStandardMaterial({
+        color: 0xfdfaf6,
+        roughness: 0.18,
+        metalness: 0.05
+      });
+
+      const darkMat = new THREE.MeshStandardMaterial({
+        color: 0x1a1a24,
+        roughness: 0.22,
+        metalness: 0.15
+      });
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const isLight = (r + c) % 2 === 0;
+          const square = new THREE.Mesh(squareGeo, isLight ? lightMat : darkMat);
+          // Conversão de (r, c) para coordenadas do mundo 3D (X e Z)
+          square.position.set((c - 3.5) * 2, 0.1, (r - 3.5) * 2);
+          square.receiveShadow = true;
+          square.userData = { r, c, isSquare: true };
+          boardMeshGroup.add(square);
+        }
+      }
+    }
+
+    // Criação Procedural de Peças 3D Esculpidas
+    function createPieceMesh(type, color) {
+      const group = new THREE.Group();
+
+      // Materiais de Luxo: Pérola Quente (Brancas) e Ônix Polido com Ouro (Pretas)
+      const mat = new THREE.MeshStandardMaterial({
+        color: color === 'w' ? 0xfbf7f2 : 0x141416,
+        roughness: color === 'w' ? 0.2 : 0.3,
+        metalness: color === 'w' ? 0.1 : 0.45
+      });
+
+      const goldMat = new THREE.MeshStandardMaterial({
+        color: 0xd4af37,
+        roughness: 0.25,
+        metalness: 0.9
+      });
+
+      function addMesh(geo, y, material = mat, scaleX = 1, scaleZ = 1) {
+        const m = new THREE.Mesh(geo, material);
+        m.position.y = y;
+        m.scale.set(scaleX, 1, scaleZ);
+        m.castShadow = true;
+        m.receiveShadow = true;
+        group.add(m);
+      }
+
+      // Base Padrão Esculpida de Todas as Peças
+      addMesh(new THREE.CylinderGeometry(0.72, 0.8, 0.25, 24), 0.125);
+      addMesh(new THREE.CylinderGeometry(0.58, 0.7, 0.18, 24), 0.3);
+      addMesh(new THREE.CylinderGeometry(0.38, 0.52, 0.6, 20), 0.65);
+
+      if (type === 'P') { // PEÃO
+        addMesh(new THREE.SphereGeometry(0.42, 20, 20), 1.15);
+      } else if (type === 'R') { // TORRE
+        addMesh(new THREE.CylinderGeometry(0.55, 0.45, 0.6, 20), 1.1);
+        addMesh(new THREE.CylinderGeometry(0.65, 0.6, 0.35, 16), 1.45);
+      } else if (type === 'N') { // CAVALO
+        addMesh(new THREE.BoxGeometry(0.45, 0.75, 0.8), 1.25);
+        addMesh(new THREE.SphereGeometry(0.35, 16, 16), 1.5, mat, 0.8, 1.2);
+      } else if (type === 'B') { // BISPO
+        addMesh(new THREE.CylinderGeometry(0.45, 0.35, 0.7, 20), 1.15);
+        addMesh(new THREE.SphereGeometry(0.42, 20, 20), 1.55, mat, 0.8, 1);
+        addMesh(new THREE.SphereGeometry(0.12, 12, 12), 1.95, goldMat);
+      } else if (type === 'Q') { // RAINHA
+        addMesh(new THREE.CylinderGeometry(0.52, 0.38, 0.95, 24), 1.25);
+        addMesh(new THREE.CylinderGeometry(0.68, 0.3, 0.35, 24), 1.8);
+        addMesh(new THREE.SphereGeometry(0.18, 16, 16), 2.05, goldMat);
+      } else if (type === 'K') { // REI
+        addMesh(new THREE.CylinderGeometry(0.55, 0.4, 1.1, 24), 1.35);
+        addMesh(new THREE.CylinderGeometry(0.65, 0.45, 0.4, 24), 1.9);
+        // Cruz da Coroa do Rei
+        addMesh(new THREE.BoxGeometry(0.12, 0.45, 0.12), 2.25, goldMat);
+        addMesh(new THREE.BoxGeometry(0.35, 0.12, 0.12), 2.3, goldMat);
+      }
+
+      return group;
+    }
+
+    function update3DPieces() {
+      // Limpa modelos anteriores
+      while (piecesMeshGroup.children.length > 0) {
+        piecesMeshGroup.remove(piecesMeshGroup.children[0]);
+      }
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const piece = boardState[r][c];
+          if (piece) {
+            const mesh = createPieceMesh(piece.type, piece.color);
+            mesh.position.set((c - 3.5) * 2, 0.2, (r - 3.5) * 2);
+            mesh.userData = { r, c, isPiece: true, color: piece.color };
+            piecesMeshGroup.add(mesh);
+          }
+        }
+      }
+    }
+
+    // Destaque de Casas Válidas e Alvos com Anéis de Luz
+    function showHighlights() {
+      clearHighlights();
+
+      // Destaque da Casa Selecionada (Dourado Suave)
+      if (selectedSquare) {
+        const selGeo = new THREE.RingGeometry(0.3, 0.85, 32);
+        const selMat = new THREE.MeshBasicMaterial({ color: 0xf5cd79, side: THREE.DoubleSide });
+        const selMesh = new THREE.Mesh(selGeo, selMat);
+        selMesh.rotation.x = -Math.PI / 2;
+        selMesh.position.set((selectedSquare.c - 3.5) * 2, 0.22, (selectedSquare.r - 3.5) * 2);
+        highlightGroup.add(selMesh);
+      }
+
+      // Destaque dos Movimentos Possíveis (Esferas Esmeralda)
+      validMoves.forEach(m => {
+        const isEnemy = (boardState[m.r][m.c] !== null);
+        const ringGeo = new THREE.RingGeometry(0.25, isEnemy ? 0.85 : 0.55, 24);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: isEnemy ? 0xe74c3c : 0x2ecc71,
+          side: THREE.DoubleSide
+        });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh.rotation.x = -Math.PI / 2;
+        ringMesh.position.set((m.c - 3.5) * 2, 0.22, (m.r - 3.5) * 2);
+        highlightGroup.add(ringMesh);
+      });
+    }
+
+    function clearHighlights() {
+      while (highlightGroup.children.length > 0) {
+        highlightGroup.remove(highlightGroup.children[0]);
+      }
+    }
+
+    // Interação com o Tabuleiro 3D via Raycasting
+    function onPointerDown(event) {
+      if (currentTurn !== myColor) return;
+
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+
+      // Testa clique nas casas e peças
+      const intersects = raycaster.intersectObjects([
+        ...boardMeshGroup.children,
+        ...piecesMeshGroup.children
+      ], true);
+
+      if (intersects.length === 0) return;
+
+      let hitObj = intersects[0].object;
+      while (hitObj.parent && !hitObj.userData.isSquare && !hitObj.userData.isPiece) {
+        hitObj = hitObj.parent;
+      }
+
+      const hitData = hitObj.userData;
+      if (!hitData) return;
+
+      const r = hitData.r;
+      const c = hitData.c;
+
+      // 1. Se clicou na sua própria peça
+      if (boardState[r][c] && boardState[r][c].color === myColor) {
+        selectedSquare = { r, c };
+        validMoves = getPieceValidMoves(r, c);
+        showHighlights();
+        return;
+      }
+
+      // 2. Se clicou em um destino válido
+      if (selectedSquare) {
+        const isTarget = validMoves.some(m => m.r === r && m.c === c);
+        if (isTarget) {
+          executeChessMove(selectedSquare, { r, c });
+        } else {
+          selectedSquare = null;
+          validMoves = [];
+          clearHighlights();
+        }
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
