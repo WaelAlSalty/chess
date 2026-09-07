@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Xadrez Real - Estilo Chess Clássico</title>
-  
-  <!-- Three.js (Motor 3D) e OrbitControls -->
+  <title>Chess Titans - Edição Clássica Windows</title>
+
+  <!-- Three.js e OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <!-- PeerJS -->
@@ -13,14 +13,9 @@
 
   <style>
     :root {
-      --bg-chess: #302e2b;
-      --board-dark: #769656;
-      --board-light: #eeeed2;
-      --highlight: rgba(247, 247, 105, 0.65);
-      --dot-valid: rgba(0, 0, 0, 0.2);
-      --card-bg: #262421;
-      --accent-green: #81b64c;
-      --accent-hover: #a3d160;
+      --gold: #f39c12;
+      --titans-blue: #00d2d3;
+      --glass-bg: rgba(18, 22, 34, 0.88);
     }
 
     * {
@@ -30,12 +25,12 @@
       user-select: none;
       -webkit-user-select: none;
       touch-action: none;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      background-color: var(--bg-chess);
-      color: #ffffff;
+      background: radial-gradient(circle at center, #231b14, #0d0a08);
+      color: #fff;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
@@ -60,35 +55,37 @@
       display: flex;
     }
 
-    /* Menu Inicial no Estilo Chess.com */
+    /* Interface Estilo Aero Glass do Windows 7 */
     .card {
-      background: var(--card-bg);
-      border-radius: 12px;
+      background: var(--glass-bg);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(16px);
+      border-radius: 18px;
       padding: 32px 28px;
       width: 90%;
       max-width: 420px;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
       z-index: 10;
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 2.1rem;
       font-weight: 800;
+      letter-spacing: 1px;
       color: #ffffff;
-      margin-bottom: 6px;
-      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+      text-shadow: 0 0 15px rgba(0, 210, 211, 0.5);
     }
 
     h1 span {
-      color: var(--accent-green);
+      color: var(--titans-blue);
     }
 
     p.subtitle {
       font-size: 0.95rem;
-      color: #989795;
-      margin-bottom: 24px;
+      color: #a4b0be;
+      margin-bottom: 22px;
     }
 
     .form-group {
@@ -98,7 +95,7 @@
 
     label {
       font-size: 0.85rem;
-      color: #c3c2c1;
+      color: #dcdde1;
       margin-bottom: 6px;
       display: block;
       font-weight: 600;
@@ -106,76 +103,67 @@
 
     input {
       width: 100%;
-      padding: 13px 14px;
+      padding: 12px 14px;
       border-radius: 8px;
-      border: 1px solid #3d3b38;
-      background: #1e1c1a;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.5);
       color: #fff;
       font-size: 1rem;
       outline: none;
     }
 
     input:focus {
-      border-color: var(--accent-green);
+      border-color: var(--titans-blue);
     }
 
     button {
       width: 100%;
-      padding: 14px;
+      padding: 13px;
       border-radius: 8px;
       border: none;
-      font-weight: 800;
-      font-size: 1.05rem;
+      font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
       margin-top: 8px;
       transition: all 0.15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
 
-    .btn-green {
-      background: var(--accent-green);
-      color: #ffffff;
-      box-shadow: 0 4px 0 #537133;
+    .btn-blue {
+      background: linear-gradient(180deg, #00d2d3, #0984e3);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 210, 211, 0.4);
     }
 
-    .btn-green:hover {
-      background: var(--accent-hover);
-    }
-
-    .btn-green:active {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 #537133;
+    .btn-blue:hover {
+      filter: brightness(1.1);
     }
 
     .btn-dark {
-      background: #363431;
-      color: #c3c2c1;
-      border: 1px solid #45433f;
+      background: rgba(255, 255, 255, 0.08);
+      color: #dcdde1;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .btn-dark:hover {
-      background: #42403c;
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
     }
 
     .room-badge {
       font-family: monospace;
-      font-size: 1.7rem;
+      font-size: 1.8rem;
       font-weight: 800;
-      letter-spacing: 5px;
-      background: #181715;
-      color: var(--accent-green);
-      padding: 14px;
+      letter-spacing: 4px;
+      background: rgba(0, 0, 0, 0.6);
+      color: var(--titans-blue);
+      padding: 12px;
       border-radius: 8px;
-      margin: 18px 0;
-      border: 1px dashed var(--accent-green);
+      margin: 16px 0;
+      border: 1px dashed var(--titans-blue);
       user-select: all;
     }
 
-    /* Tela de Jogo e Interface Superior/Inferior */
+    /* Container 3D e HUD */
     #canvas-container {
       width: 100%;
       height: 100%;
@@ -184,106 +172,92 @@
       z-index: 1;
     }
 
-    .game-ui {
+    .hud-titans {
       position: absolute;
-      inset: 0;
-      z-index: 10;
-      pointer-events: none;
+      top: 14px;
+      width: 90%;
+      max-width: 580px;
+      background: rgba(15, 18, 28, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 10px 20px;
+      border-radius: 30px;
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
-      padding: 16px;
-      max-width: 600px;
-      margin: 0 auto;
+      align-items: center;
+      z-index: 10;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      pointer-events: none;
     }
 
     .player-tag {
-      background: rgba(38, 36, 33, 0.92);
-      border-radius: 8px;
-      padding: 10px 16px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      pointer-events: auto;
-    }
-
-    .player-tag.active-turn {
-      border-left: 5px solid var(--accent-green);
-    }
-
-    .player-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .avatar-square {
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 0.9rem;
-    }
-
-    .avatar-white { background: #ffffff; color: #1e1c1a; }
-    .avatar-black { background: #1e1c1a; color: #ffffff; border: 1px solid #555; }
-
-    .player-name {
-      font-weight: 700;
+      gap: 8px;
       font-size: 0.95rem;
+      font-weight: 700;
     }
 
-    .turn-clock {
-      font-size: 1.1rem;
-      font-weight: 800;
-      font-family: monospace;
-      color: #bababa;
-      background: #181715;
-      padding: 4px 10px;
-      border-radius: 4px;
+    .indicator-circle {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
     }
 
-    .turn-clock.active {
-      color: #ffffff;
-      background: #3d3b38;
+    .indicator-circle.white {
+      background: #ffffff;
+      box-shadow: 0 0 8px #fff;
     }
 
-    .quick-status {
-      align-self: center;
-      background: rgba(24, 23, 21, 0.85);
+    .indicator-circle.black {
+      background: #111111;
+      border: 1px solid #777;
+      box-shadow: 0 0 6px rgba(0,0,0,0.8);
+    }
+
+    .hud-titans .active-turn {
+      color: var(--titans-blue);
+      text-shadow: 0 0 8px rgba(0, 210, 211, 0.7);
+    }
+
+    .turn-bar {
+      position: absolute;
+      bottom: 20px;
+      background: rgba(15, 18, 28, 0.85);
+      border: 1px solid rgba(0, 210, 211, 0.4);
+      padding: 10px 24px;
       border-radius: 20px;
-      padding: 6px 16px;
-      font-size: 0.85rem;
-      color: #c3c2c1;
-      backdrop-filter: blur(4px);
+      font-size: 0.95rem;
+      color: #fff;
+      font-weight: bold;
+      z-index: 10;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      letter-spacing: 0.5px;
     }
 
     /* Modal de Vitória */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.8);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 100;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
     }
 
     .modal-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 28px;
+      background: var(--glass-bg);
+      border: 2px solid var(--titans-blue);
+      border-radius: 20px;
+      padding: 30px;
       text-align: center;
-      max-width: 360px;
+      max-width: 380px;
       width: 90%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-      border: 1px solid #3d3b38;
+      box-shadow: 0 0 50px rgba(0, 210, 211, 0.4);
     }
   </style>
 </head>
@@ -292,26 +266,25 @@
   <!-- TELA 1: LOBBY -->
   <div id="screen-lobby" class="screen active">
     <div class="card">
-      <h1>CHESS <span>REAL</span></h1>
-      <p class="subtitle">Duelo clássico com peças em proporção de torneio.</p>
+      <h1>CHESS <span>TITANS</span></h1>
+      <p class="subtitle">O visual clássico de madeira envernizada e anéis de luz.</p>
 
       <div class="form-group">
         <label>Seu Nome ou Apelido</label>
         <input type="text" id="player-name" placeholder="Ex: Lucas" value="Jogador 1">
       </div>
 
-      <button class="btn-green" onclick="startHostOnline()">Criar Partida Online (Brancas)</button>
+      <button class="btn-blue" onclick="startHostOnline()">Criar Sala Online (Peças Brancas)</button>
 
-      <div style="margin: 16px 0; color: #696866; font-size: 0.75rem; letter-spacing: 2px; font-weight: bold;">OU ENTRAR</div>
+      <div style="margin: 14px 0; color: #7f8c8d; font-size: 0.75rem; letter-spacing: 2px; font-weight: bold;">OU ENTRAR</div>
 
       <div class="form-group">
         <label>Código da Sala (5 Dígitos)</label>
-        <input type="text" id="join-code" placeholder="Ex: 58214" maxlength="5">
+        <input type="text" id="join-code" placeholder="Ex: 48215" maxlength="5">
       </div>
 
-      <button class="btn-dark" onclick="joinHostOnline()">Entrar na Partida (Pretas)</button>
-
-      <button class="btn-dark" style="margin-top: 16px;" onclick="startLocalPlay()">Jogar Offline (Passa e Joga no mesmo aparelho)</button>
+      <button class="btn-dark" onclick="joinHostOnline()">Entrar na Sala (Peças Pretas)</button>
+      <button class="btn-dark" style="margin-top: 14px;" onclick="startLocalPlay()">Jogar Offline (Passa e Joga no mesmo aparelho)</button>
     </div>
   </div>
 
@@ -319,51 +292,43 @@
   <div id="screen-waiting" class="screen">
     <div class="card">
       <h2>Sala Criada!</h2>
-      <p style="margin-top: 10px; font-size: 0.9rem; color: #bababa;">Envie este código numérico de 5 dígitos para ela entrar:</p>
+      <p style="margin-top: 8px; font-size: 0.9rem; color: #a4b0be;">Envie este código para ela conectar:</p>
       <div class="room-badge" id="display-room-code">-----</div>
-      <p style="font-size: 0.85rem; color: #888;">A partida começará imediatamente na tela assim que ela conectar.</p>
+      <p style="font-size: 0.85rem; color: #7f8c8d;">A partida abrirá no tabuleiro assim que ela entrar.</p>
     </div>
   </div>
 
-  <!-- TELA 3: TABULEIRO 3D ESTILO CHESS.COM -->
+  <!-- TELA 3: TABULEIRO CHESS TITANS -->
   <div id="screen-game" class="screen">
     <div id="canvas-container"></div>
 
-    <div class="game-ui">
-      <!-- Oponente (Topo) -->
-      <div class="player-tag" id="top-player-tag">
-        <div class="player-info">
-          <div class="avatar-square" id="top-avatar">♟</div>
-          <span class="player-name" id="top-player-name">Oponente</span>
-        </div>
-        <div class="turn-clock" id="top-clock">--:--</div>
+    <div class="hud-titans">
+      <div class="player-tag" id="tag-white">
+        <span class="indicator-circle white"></span>
+        <span id="name-white">Brancas</span>
       </div>
-
-      <div class="quick-status" id="quick-status">Vez das Brancas</div>
-
-      <!-- Jogador Local (Base) -->
-      <div class="player-tag" id="bottom-player-tag">
-        <div class="player-info">
-          <div class="avatar-square" id="bottom-avatar">♙</div>
-          <span class="player-name" id="bottom-player-name">Você</span>
-        </div>
-        <div class="turn-clock" id="bottom-clock">--:--</div>
+      <div style="font-size: 0.75rem; color: var(--titans-blue); letter-spacing: 2px; font-weight: 800;">CHESS TITANS</div>
+      <div class="player-tag" id="tag-black">
+        <span class="indicator-circle black"></span>
+        <span id="name-black">Pretas</span>
       </div>
     </div>
+
+    <div class="turn-bar" id="status-turn">Vez das Brancas</div>
   </div>
 
-  <!-- MODAL DE FINAL DE JOGO -->
+  <!-- MODAL DE VITÓRIA -->
   <div class="modal-overlay" id="modal-victory">
     <div class="modal-card">
-      <h2 id="winner-title" style="color: #ffffff; font-size: 1.6rem; margin-bottom: 8px;">XEQUE-MATE</h2>
-      <p id="winner-desc" style="color: #bababa; margin-bottom: 20px; font-size: 0.95rem;">Uma vitória incontestável.</p>
-      <button class="btn-green" onclick="restartMatch()">Jogar Novamente</button>
+      <h2 id="winner-title" style="color: var(--titans-blue); font-size: 1.8rem; margin-bottom: 10px;">XEQUE-MATE</h2>
+      <p id="winner-desc" style="color: #dcdde1; margin-bottom: 22px; font-size: 0.95rem;">Fim da partida.</p>
+      <button class="btn-blue" onclick="restartMatch()">Jogar Novamente</button>
     </div>
   </div>
 
   <script>
-    // Sintetizador Web Audio API fiel aos sons autênticos de toque de xadrez
-    class ChessFX {
+    // Sintetizador Nativo Web Audio API (Lances suaves do Chess Titans)
+    class TitansAudio {
       constructor() { this.ctx = null; }
       init() {
         if (!this.ctx) {
@@ -377,54 +342,53 @@
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.09);
+        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.08);
         gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.09);
+        osc.stop(this.ctx.currentTime + 0.08);
       }
       playCapture() {
         this.init();
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(460, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.14);
+        osc.frequency.setValueAtTime(420, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(90, this.ctx.currentTime + 0.12);
         gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.14);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.14);
+        osc.stop(this.ctx.currentTime + 0.12);
       }
       playVictory() {
         this.init();
-        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.1);
-          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.1);
-          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.1 + 0.3);
+          osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.1);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + i * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + i * 0.1 + 0.25);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
-          osc.start(this.ctx.currentTime + idx * 0.1);
-          osc.stop(this.ctx.currentTime + idx * 0.1 + 0.3);
+          osc.start(this.ctx.currentTime + i * 0.1);
+          osc.stop(this.ctx.currentTime + i * 0.1 + 0.25);
         });
       }
     }
-    const sfx = new ChessFX();
+    const sfx = new TitansAudio();
 
-    // Configuração ICE STUN explícita do Google para atravessar 4G e Wi-Fi sem erro
+    // Rede WebRTC com servidores STUN públicos Google
     const PEER_CONFIG = {
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' }
         ]
       }
     };
@@ -437,26 +401,28 @@
     let myName = "Jogador 1";
     let oppName = "Jogador 2";
 
-    // Matriz lógica do Xadrez (8x8)
-    // Linha 0 = Peças Pretas principais, Linha 7 = Peças Brancas principais
+    // Tabuleiro Lógico 8x8
     let boardState = [];
     let currentTurn = 'w';
     let selectedSquare = null;
     let validMoves = [];
-    let lastMoveHighlight = null; // { from: {r, c}, to: {r, c} }
 
     // Three.js
     let scene, camera, renderer, controls;
-    let boardGroup, piecesGroup, highlightGroup;
+    let boardGroup, highlightGroup;
+    let piecesMatrix = Array(8).fill(null).map(() => Array(8).fill(null)); // Armazena instâncias das malhas 3D
     let raycaster, mouse;
     let pointerDownPos = { x: 0, y: 0 };
+
+    // Materiais compartilhados para evitar alocação repetida na memória
+    let whitePieceMat, blackPieceMat;
 
     function switchScreen(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
     }
 
-    // ================= CONEXÃO PEERJS =================
+    // ================= CONEXÃO P2P =================
     function startHostOnline() {
       sfx.init();
       myName = document.getElementById('player-name').value.trim() || 'Brancas';
@@ -464,9 +430,8 @@
       isLocal = false;
       myColor = 'w';
 
-      // Código de 5 dígitos numéricos limpo
       const roomNum = Math.floor(10000 + Math.random() * 90000).toString();
-      const customId = "chessreal-" + roomNum;
+      const customId = "titans-" + roomNum;
 
       peer = new Peer(customId, PEER_CONFIG);
 
@@ -482,7 +447,7 @@
 
       peer.on('error', (err) => {
         console.error(err);
-        alert("O servidor de salas públicas demorou a responder. Tente novamente em alguns segundos ou use o Modo Offline!");
+        alert("Erro no servidor PeerJS. Tente novamente ou utilize o modo offline.");
       });
     }
 
@@ -495,20 +460,19 @@
 
       const codeInput = document.getElementById('join-code').value.trim();
       if (!codeInput || codeInput.length < 4) {
-        return alert("Digite o código de 5 dígitos gerado pelo outro aparelho!");
+        return alert("Digite o código de 5 dígitos gerado pelo Host!");
       }
 
-      const targetId = "chessreal-" + codeInput;
       peer = new Peer(PEER_CONFIG);
 
       peer.on('open', () => {
-        conn = peer.connect(targetId, { reliable: true });
+        conn = peer.connect("titans-" + codeInput, { reliable: true });
         setupConnectionEvents();
       });
 
       peer.on('error', (err) => {
         console.error(err);
-        alert("Não foi possível achar a sala. Certifique-se de que o primeiro aparelho já abriu a tela do código!");
+        alert("Não foi possível conectar. Verifique o código digitado.");
       });
     }
 
@@ -524,8 +488,8 @@
       document.getElementById('modal-victory').style.display = 'none';
 
       initThreeJS();
-      initBoardState();
-      updateUI();
+      initBoard();
+      updateHUD();
     }
 
     function setupConnectionEvents() {
@@ -537,7 +501,7 @@
 
         if (isHost) {
           conn.send({ type: 'HANDSHAKE', name: myName });
-          initBoardState();
+          initBoard();
         } else {
           conn.send({ type: 'HANDSHAKE', name: myName });
         }
@@ -550,69 +514,65 @@
             conn.send({ type: 'SYNC_NAMES', hostName: myName, clientName: oppName });
             broadcastSync();
           }
-          updateUI();
+          updateHUD();
         } else if (data.type === 'SYNC_NAMES') {
           oppName = data.hostName;
-          updateUI();
-        } else if (data.type === 'SYNC_STATE') {
-          boardState = data.board;
+          updateHUD();
+        } else if (data.type === 'SYNC_MOVE') {
+          applyMoveToLogicalAndVisual(data.from, data.to);
           currentTurn = data.turn;
-          lastMoveHighlight = data.lastMove;
           if (data.action === 'capture') sfx.playCapture();
-          else if (data.action === 'move') sfx.playMove();
-          update3DPieces();
-          updateUI();
+          else sfx.playMove();
+          updateHUD();
           checkGameOver();
         } else if (data.type === 'RESTART') {
-          initBoardState();
+          initBoard();
         }
       });
 
       conn.on('close', () => {
-        alert("A conexão com o oponente foi encerrada.");
+        alert("A conexão com o oponente foi perdida!");
         location.reload();
       });
     }
 
-    // ================= LÓGICA DO TABULEIRO =================
-    function initBoardState() {
+    // ================= LÓGICA E REGRAS DE XADREZ =================
+    function initBoard() {
       boardState = Array(8).fill(null).map(() => Array(8).fill(null));
-      const piecesOrder = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
+      const order = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
 
       for (let c = 0; c < 8; c++) {
-        boardState[0][c] = { type: piecesOrder[c], color: 'b' };
+        boardState[0][c] = { type: order[c], color: 'b' };
         boardState[1][c] = { type: 'P', color: 'b' };
         boardState[6][c] = { type: 'P', color: 'w' };
-        boardState[7][c] = { type: piecesOrder[c], color: 'w' };
+        boardState[7][c] = { type: order[c], color: 'w' };
       }
 
       currentTurn = 'w';
       selectedSquare = null;
       validMoves = [];
-      lastMoveHighlight = null;
 
       document.getElementById('modal-victory').style.display = 'none';
 
-      if (!isLocal) broadcastSync();
-      update3DPieces();
-      updateUI();
+      spawnAllPiecesOnce();
+      clearHighlights();
+      updateHUD();
     }
 
-    function broadcastSync(action = null) {
+    function broadcastSync(moveData = null, action = null) {
       if (!isHost || !conn || !conn.open) return;
-      conn.send({
-        type: 'SYNC_STATE',
-        board: boardState,
-        turn: currentTurn,
-        lastMove: lastMoveHighlight,
-        action: action
-      });
-      update3DPieces();
-      updateUI();
-      checkGameOver();
+      if (moveData) {
+        conn.send({
+          type: 'SYNC_MOVE',
+          from: moveData.from,
+          to: moveData.to,
+          turn: currentTurn,
+          action: action
+        });
+      }
     }
 
-    function getPieceValidMoves(r, c) {
+    function getValidMoves(r, c) {
       const piece = boardState[r][c];
       if (!piece) return [];
 
@@ -693,21 +653,47 @@
       return moves;
     }
 
-    function executeMove(from, to) {
+    // Reposiciona a malha 3D instantaneamente sem recriar objetos (0ms de latência)
+    function applyMoveToLogicalAndVisual(from, to) {
       const piece = boardState[from.r][from.c];
       const target = boardState[to.r][to.c];
       const isCapture = (target !== null);
 
-      boardState[to.r][to.c] = piece;
-      boardState[from.r][from.c] = null;
+      // Remove a peça visual capturada
+      if (piecesMatrix[to.r][to.c]) {
+        scene.remove(piecesMatrix[to.r][to.c]);
+        piecesMatrix[to.r][to.c] = null;
+      }
 
-      if (piece.type === 'P') {
-        if ((piece.color === 'w' && to.r === 0) || (piece.color === 'b' && to.r === 7)) {
-          piece.type = 'Q';
+      // Move a peça visual existente
+      const pieceMesh = piecesMatrix[from.r][from.c];
+      if (pieceMesh) {
+        pieceMesh.position.set((to.c - 3.5) * 2.0, 0.15, (to.r - 3.5) * 2.0);
+        piecesMatrix[to.r][to.c] = pieceMesh;
+        piecesMatrix[from.r][from.c] = null;
+      }
+
+      // Promoção visual rápida
+      if (piece.type === 'P' && ((piece.color === 'w' && to.r === 0) || (piece.color === 'b' && to.r === 7))) {
+        piece.type = 'Q';
+        if (pieceMesh) {
+          scene.remove(pieceMesh);
+          const newQueen = buildPieceMesh('Q', piece.color);
+          newQueen.position.set((to.c - 3.5) * 2.0, 0.15, (to.r - 3.5) * 2.0);
+          scene.add(newQueen);
+          piecesMatrix[to.r][to.c] = newQueen;
         }
       }
 
-      lastMoveHighlight = { from, to };
+      boardState[to.r][to.c] = piece;
+      boardState[from.r][from.c] = null;
+
+      return isCapture;
+    }
+
+    function executePlayerMove(from, to) {
+      const isCapture = applyMoveToLogicalAndVisual(from, to);
+
       currentTurn = (currentTurn === 'w') ? 'b' : 'w';
       selectedSquare = null;
       validMoves = [];
@@ -718,21 +704,21 @@
       else sfx.playMove();
 
       if (isLocal) {
-        update3DPieces();
-        updateUI();
+        updateHUD();
         checkGameOver();
       } else if (isHost) {
-        broadcastSync(action);
+        broadcastSync({ from, to }, action);
+        updateHUD();
+        checkGameOver();
       } else {
         conn.send({
-          type: 'SYNC_STATE',
-          board: boardState,
+          type: 'SYNC_MOVE',
+          from,
+          to,
           turn: currentTurn,
-          lastMove: lastMoveHighlight,
-          action: action
+          action
         });
-        update3DPieces();
-        updateUI();
+        updateHUD();
         checkGameOver();
       }
     }
@@ -756,7 +742,7 @@
         const winner = whiteKing ? 'w' : 'b';
         const isMe = (isLocal || winner === myColor);
 
-        document.getElementById('winner-title').innerText = isMe ? "VITÓRIA! XEQUE-MATE 👑" : "DERROTA POR XEQUE-MATE";
+        document.getElementById('winner-title').innerText = isMe ? "XEQUE-MATE! VITÓRIA 👑" : "XEQUE-MATE!";
         document.getElementById('winner-desc').innerText = isMe
           ? (whiteKing ? "As Brancas venceram a partida!" : "As Pretas venceram a partida!")
           : "O adversário capturou seu Rei.";
@@ -767,65 +753,58 @@
 
     function restartMatch() {
       if (isLocal) {
-        initBoardState();
+        initBoard();
       } else if (isHost) {
-        initBoardState();
+        initBoard();
         conn.send({ type: 'RESTART' });
       } else {
         conn.send({ type: 'RESTART' });
       }
     }
 
-    function updateUI() {
+    function updateHUD() {
       const isWhiteTurn = (currentTurn === 'w');
       const isMyTurn = isLocal ? true : (currentTurn === myColor);
 
-      const statusEl = document.getElementById('quick-status');
-      statusEl.innerText = isWhiteTurn ? "Vez das Brancas" : "Vez das Pretas";
+      const statusEl = document.getElementById('status-turn');
+      if (isMyTurn) {
+        statusEl.innerText = isWhiteTurn ? "Sua vez de jogar (Brancas)" : "Sua vez de jogar (Pretas)";
+        statusEl.style.color = "#00d2d3";
+      } else {
+        statusEl.innerText = "Aguardando jogada do oponente...";
+        statusEl.style.color = "#a4b0be";
+      }
+
+      document.getElementById('tag-white').classList.toggle('active-turn', isWhiteTurn);
+      document.getElementById('tag-black').classList.toggle('active-turn', !isWhiteTurn);
 
       if (myColor === 'b') {
-        // Visão do jogador preto
-        document.getElementById('top-player-name').innerText = isLocal ? "Pretas" : oppName;
-        document.getElementById('bottom-player-name').innerText = isLocal ? "Brancas" : `${myName} (Você)`;
-        document.getElementById('top-avatar').innerText = "♙";
-        document.getElementById('bottom-avatar').innerText = "♟";
-        document.getElementById('top-avatar').className = "avatar-square avatar-white";
-        document.getElementById('bottom-avatar').className = "avatar-square avatar-black";
-
-        document.getElementById('top-player-tag').classList.toggle('active-turn', isWhiteTurn);
-        document.getElementById('bottom-player-tag').classList.toggle('active-turn', !isWhiteTurn);
+        document.getElementById('name-white').innerText = isLocal ? "Brancas" : oppName;
+        document.getElementById('name-black').innerText = isLocal ? "Pretas" : `${myName} (Você)`;
       } else {
-        // Visão do jogador branco
-        document.getElementById('top-player-name').innerText = isLocal ? "Pretas" : oppName;
-        document.getElementById('bottom-player-name').innerText = isLocal ? "Brancas" : `${myName} (Você)`;
-        document.getElementById('top-avatar').innerText = "♟";
-        document.getElementById('bottom-avatar').innerText = "♙";
-        document.getElementById('top-avatar').className = "avatar-square avatar-black";
-        document.getElementById('bottom-avatar').className = "avatar-square avatar-white";
-
-        document.getElementById('top-player-tag').classList.toggle('active-turn', !isWhiteTurn);
-        document.getElementById('bottom-player-tag').classList.toggle('active-turn', isWhiteTurn);
+        document.getElementById('name-white').innerText = isLocal ? "Brancas" : `${myName} (Você)`;
+        document.getElementById('name-black').innerText = isLocal ? "Pretas" : oppName;
       }
     }
 
-    // ================= MOTOR 3D ESTILO CHESS.COM =================
+    // ================= MOTOR 3D ESTILO CHESS TITANS =================
     function initThreeJS() {
       const container = document.getElementById('canvas-container');
       container.innerHTML = '';
 
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x302e2b);
+      scene.background = new THREE.Color(0x110d0a);
 
       camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-      // Câmera clássica isométrica elegante
+      // Posição angular frontal clássica do Chess Titans do Windows
       if (myColor === 'b') {
-        camera.position.set(0, 24, -20);
+        camera.position.set(0, 20, -21);
       } else {
-        camera.position.set(0, 24, 20);
+        camera.position.set(0, 20, 21);
       }
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
@@ -836,51 +815,61 @@
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
       controls.maxPolarAngle = Math.PI / 2.2;
-      controls.minDistance = 14;
-      controls.maxDistance = 35;
+      controls.minDistance = 12;
+      controls.maxDistance = 32;
       controls.target.set(0, 0, 0);
 
-      // Iluminação zenital suave (sem superexposição)
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+      // Materiais Únicos Compartilhados (Alta performance)
+      whitePieceMat = new THREE.MeshStandardMaterial({
+        color: 0xf4eee1,
+        roughness: 0.15,
+        metalness: 0.05
+      });
+
+      blackPieceMat = new THREE.MeshStandardMaterial({
+        color: 0x161311,
+        roughness: 0.25,
+        metalness: 0.2
+      });
+
+      // Luz ambiente aconchegante e iluminação quente de madeira
+      const ambientLight = new THREE.AmbientLight(0xffedd8, 0.75);
       scene.add(ambientLight);
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
-      dirLight.position.set(8, 22, 10);
-      dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
-      dirLight.shadow.camera.near = 0.5;
-      dirLight.shadow.camera.far = 50;
-      dirLight.shadow.camera.left = -10;
-      dirLight.shadow.camera.right = 10;
-      dirLight.shadow.camera.top = 10;
-      dirLight.shadow.camera.bottom = -10;
-      dirLight.shadow.bias = -0.0004;
-      scene.add(dirLight);
+      const mainLight = new THREE.DirectionalLight(0xffffff, 1.1);
+      mainLight.position.set(8, 22, 10);
+      mainLight.castShadow = true;
+      mainLight.shadow.mapSize.width = 2048;
+      mainLight.shadow.mapSize.height = 2048;
+      mainLight.shadow.bias = -0.0003;
+      scene.add(mainLight);
+
+      const rimLight = new THREE.DirectionalLight(0x00d2d3, 0.35);
+      rimLight.position.set(-12, 8, -12);
+      scene.add(rimLight);
 
       boardGroup = new THREE.Group();
-      piecesGroup = new THREE.Group();
       highlightGroup = new THREE.Group();
       scene.add(boardGroup);
-      scene.add(piecesGroup);
       scene.add(highlightGroup);
 
       raycaster = new THREE.Raycaster();
       mouse = new THREE.Vector2();
 
-      buildChessComBoard();
+      buildTitansBoard();
 
       window.addEventListener('resize', onResize);
 
-      // Prevenção de conflito entre orbit e click
+      // Registro rápido de ponteiro (Elimina overhead do [Violation])
       renderer.domElement.addEventListener('pointerdown', (e) => {
-        pointerDownPos = { x: e.clientX, y: e.clientY };
+        pointerDownPos.x = e.clientX;
+        pointerDownPos.y = e.clientY;
       });
 
       renderer.domElement.addEventListener('pointerup', (e) => {
         const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
         if (dist < 6) {
-          handleSquareClick(e);
+          handleBoardClick(e);
         }
       });
 
@@ -893,45 +882,56 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    // Tabuleiro Verde/Creme fiel ao Chess.com
-    function buildChessComBoard() {
-      // Borda Externa Cinza Escuro
-      const borderGeo = new THREE.BoxGeometry(17.4, 0.6, 17.4);
+    // Tabuleiro Clássico de Madeira Envernizada do Windows 7
+    function buildTitansBoard() {
+      // 1. Mesa de Madeira ao Fundo
+      const tableGeo = new THREE.BoxGeometry(28, 0.5, 28);
+      const tableMat = new THREE.MeshStandardMaterial({ color: 0x1a120b, roughness: 0.5 });
+      const tableMesh = new THREE.Mesh(tableGeo, tableMat);
+      tableMesh.position.y = -0.7;
+      tableMesh.receiveShadow = true;
+      boardGroup.add(tableMesh);
+
+      // 2. Moldura Chanfrada Espessa de Carvalho Nobre
+      const borderGeo = new THREE.BoxGeometry(17.8, 0.8, 17.8);
       const borderMat = new THREE.MeshStandardMaterial({
-        color: 0x262421,
-        roughness: 0.5
+        color: 0x3d2314,
+        roughness: 0.3,
+        metalness: 0.1
       });
       const borderMesh = new THREE.Mesh(borderGeo, borderMat);
-      borderMesh.position.y = -0.3;
+      borderMesh.position.y = -0.35;
       borderMesh.receiveShadow = true;
       boardGroup.add(borderMesh);
 
-      // Casas Verdes (#769656) e Cremes (#eeeed2)
+      // 3. Moldura Interna Dourada
+      const goldEdgeGeo = new THREE.BoxGeometry(16.5, 0.85, 16.5);
+      const goldEdgeMat = new THREE.MeshStandardMaterial({ color: 0x8a6326, roughness: 0.35, metalness: 0.8 });
+      const goldEdgeMesh = new THREE.Mesh(goldEdgeGeo, goldEdgeMat);
+      goldEdgeMesh.position.y = -0.34;
+      boardGroup.add(goldEdgeMesh);
+
+      // 4. Casas em Madeira Clara (Bordo) e Escura (Nogueira)
       const sqGeo = new THREE.BoxGeometry(2.0, 0.2, 2.0);
-      const greenMat = new THREE.MeshStandardMaterial({ color: 0x769656, roughness: 0.6 });
-      const creamMat = new THREE.MeshStandardMaterial({ color: 0xeeeed2, roughness: 0.6 });
+      const lightWood = new THREE.MeshStandardMaterial({ color: 0xedd6b1, roughness: 0.35 });
+      const darkWood = new THREE.MeshStandardMaterial({ color: 0x6e3c1e, roughness: 0.4 });
 
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
-          const isCream = (r + c) % 2 === 0;
-          const sq = new THREE.Mesh(sqGeo, isCream ? creamMat : greenMat);
+          const isLight = (r + c) % 2 === 0;
+          const sq = new THREE.Mesh(sqGeo, isLight ? lightWood : darkWood);
           sq.position.set((c - 3.5) * 2.0, 0.05, (r - 3.5) * 2.0);
           sq.receiveShadow = true;
-          sq.userData = { r, c, isSquare: true };
+          sq.userData = { r, c };
           boardGroup.add(sq);
         }
       }
     }
 
-    // Peças com proporções clássicas torneio Staunton
-    function createStauntonPiece(type, color, r, c) {
+    // Geometrias das Peças Estilo Chess Titans
+    function buildPieceMesh(type, color) {
       const group = new THREE.Group();
-
-      const mat = new THREE.MeshStandardMaterial({
-        color: color === 'w' ? 0xf8f8f8 : 0x242220,
-        roughness: color === 'w' ? 0.35 : 0.45,
-        metalness: 0.05
-      });
+      const mat = (color === 'w') ? whitePieceMat : blackPieceMat;
 
       function add(geo, y, sX = 1, sZ = 1) {
         const m = new THREE.Mesh(geo, mat);
@@ -939,11 +939,10 @@
         m.scale.set(sX, 1, sZ);
         m.castShadow = true;
         m.receiveShadow = true;
-        m.userData = { r, c, isPiece: true, color };
         group.add(m);
       }
 
-      // Base clássica chanfrada
+      // Base arredondada esmaltada
       add(new THREE.CylinderGeometry(0.72, 0.78, 0.22, 24), 0.11);
       add(new THREE.CylinderGeometry(0.58, 0.68, 0.16, 24), 0.28);
       add(new THREE.CylinderGeometry(0.38, 0.52, 0.6, 20), 0.62);
@@ -972,97 +971,67 @@
         add(new THREE.BoxGeometry(0.34, 0.12, 0.12), 2.34);
       }
 
-      group.userData = { r, c, isPiece: true, color };
       return group;
     }
 
-    function update3DPieces() {
-      while (piecesGroup.children.length > 0) {
-        piecesGroup.remove(piecesGroup.children[0]);
-      }
-
+    function spawnAllPiecesOnce() {
+      // Remove peças antigas se houver
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
-          const p = boardState[r][c];
-          if (p) {
-            const mesh = createStauntonPiece(p.type, p.color, r, c);
-            mesh.position.set((c - 3.5) * 2.0, 0.15, (r - 3.5) * 2.0);
-            piecesGroup.add(mesh);
+          if (piecesMatrix[r][c]) {
+            scene.remove(piecesMatrix[r][c]);
+            piecesMatrix[r][c] = null;
           }
         }
       }
 
-      renderHighlights();
+      // Cria as instâncias das peças apenas 1 vez no início do jogo
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const piece = boardState[r][c];
+          if (piece) {
+            const mesh = buildPieceMesh(piece.type, piece.color);
+            mesh.position.set((c - 3.5) * 2.0, 0.15, (r - 3.5) * 2.0);
+            scene.add(mesh);
+            piecesMatrix[r][c] = mesh;
+          }
+        }
+      }
     }
 
-    // Indicadores visuais estilo Chess.com (Amarelo suave de seleção e bolinhas cinzas transparentes)
+    // Anéis Luminosos Azuis Neon do Chess Titans
     function renderHighlights() {
       clearHighlights();
 
-      // Destaque do Último Lance
-      if (lastMoveHighlight) {
-        [lastMoveHighlight.from, lastMoveHighlight.to].forEach(pt => {
-          const geo = new THREE.PlaneGeometry(1.98, 1.98);
-          const mat = new THREE.MeshBasicMaterial({
-            color: 0xf7f769,
-            transparent: true,
-            opacity: 0.45,
-            depthWrite: false
-          });
-          const m = new THREE.Mesh(geo, mat);
-          m.rotation.x = -Math.PI / 2;
-          m.position.set((pt.c - 3.5) * 2.0, 0.16, (pt.r - 3.5) * 2.0);
-          highlightGroup.add(m);
-        });
-      }
-
-      // Destaque da Casa Selecionada
+      // 1. Anel Neon Ciano Debaixo da Peça Selecionada
       if (selectedSquare) {
-        const geo = new THREE.PlaneGeometry(1.98, 1.98);
-        const mat = new THREE.MeshBasicMaterial({
-          color: 0xf7f769,
+        const ringGeo = new THREE.RingGeometry(0.65, 0.95, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: 0x00d2d3,
+          side: THREE.DoubleSide,
           transparent: true,
-          opacity: 0.65,
-          depthWrite: false
+          opacity: 0.85
         });
-        const m = new THREE.Mesh(geo, mat);
+        const m = new THREE.Mesh(ringGeo, ringMat);
         m.rotation.x = -Math.PI / 2;
-        m.position.set((selectedSquare.c - 3.5) * 2.0, 0.17, (selectedSquare.r - 3.5) * 2.0);
+        m.position.set((selectedSquare.c - 3.5) * 2.0, 0.18, (selectedSquare.r - 3.5) * 2.0);
         highlightGroup.add(m);
       }
 
-      // Bolinhas/Anéis de Casas Válidas
+      // 2. Discos de Luz Ciano e Vermelha nos Movimentos Válidos
       validMoves.forEach(tgt => {
         const isEnemy = (boardState[tgt.r][tgt.c] !== null);
-
-        if (isEnemy) {
-          // Anel nos cantos da peça inimiga
-          const ringGeo = new THREE.RingGeometry(0.72, 0.95, 32);
-          const ringMat = new THREE.MeshBasicMaterial({
-            color: 0x000000,
-            transparent: true,
-            opacity: 0.22,
-            depthWrite: false,
-            side: THREE.DoubleSide
-          });
-          const rMesh = new THREE.Mesh(ringGeo, ringMat);
-          rMesh.rotation.x = -Math.PI / 2;
-          rMesh.position.set((tgt.c - 3.5) * 2.0, 0.18, (tgt.r - 3.5) * 2.0);
-          highlightGroup.add(rMesh);
-        } else {
-          // Ponto cinza escuro translúcido no centro
-          const dotGeo = new THREE.CircleGeometry(0.32, 24);
-          const dotMat = new THREE.MeshBasicMaterial({
-            color: 0x000000,
-            transparent: true,
-            opacity: 0.2,
-            depthWrite: false
-          });
-          const dMesh = new THREE.Mesh(dotGeo, dotMat);
-          dMesh.rotation.x = -Math.PI / 2;
-          dMesh.position.set((tgt.c - 3.5) * 2.0, 0.18, (tgt.r - 3.5) * 2.0);
-          highlightGroup.add(dMesh);
-        }
+        const targetGeo = new THREE.RingGeometry(0.4, 0.88, 32);
+        const targetMat = new THREE.MeshBasicMaterial({
+          color: isEnemy ? 0xff4757 : 0x00d2d3,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.55
+        });
+        const m = new THREE.Mesh(targetGeo, targetMat);
+        m.rotation.x = -Math.PI / 2;
+        m.position.set((tgt.c - 3.5) * 2.0, 0.18, (tgt.r - 3.5) * 2.0);
+        highlightGroup.add(m);
       });
     }
 
@@ -1072,8 +1041,8 @@
       }
     }
 
-    // Clique e Seleção de Peças
-    function handleSquareClick(event) {
+    // Clique ultra-otimizado (testa apenas as 64 casas estáticas do tabuleiro)
+    function handleBoardClick(event) {
       if (!isLocal && currentTurn !== myColor) return;
 
       const rect = renderer.domElement.getBoundingClientRect();
@@ -1082,51 +1051,37 @@
 
       raycaster.setFromCamera(mouse, camera);
 
-      const intersects = raycaster.intersectObjects([
-        ...boardGroup.children,
-        ...piecesGroup.children
-      ], true);
-
+      // O Raycaster testa apenas o grupo do tabuleiro (zero lag na thread principal)
+      const intersects = raycaster.intersectObjects(boardGroup.children, false);
       if (intersects.length === 0) return;
 
-      let hitData = null;
-      for (let hit of intersects) {
-        let cur = hit.object;
-        while (cur) {
-          if (cur.userData && (cur.userData.isSquare || cur.userData.isPiece)) {
-            hitData = cur.userData;
-            break;
-          }
-          cur = cur.parent;
-        }
-        if (hitData) break;
-      }
+      const hitSquare = intersects[0].object;
+      if (!hitSquare.userData || hitSquare.userData.r === undefined) return;
 
-      if (!hitData) return;
+      const r = hitSquare.userData.r;
+      const c = hitSquare.userData.c;
 
-      const r = hitData.r;
-      const c = hitData.c;
-
-      // 1. Clicou na peça de quem é a vez
       const piece = boardState[r][c];
       const isMyPiece = piece && (isLocal ? piece.color === currentTurn : piece.color === myColor);
 
+      // 1. Clicou na peça própria
       if (isMyPiece) {
         selectedSquare = { r, c };
-        validMoves = getPieceValidMoves(r, c);
+        validMoves = getValidMoves(r, c);
         renderHighlights();
+        sfx.playMove();
         return;
       }
 
-      // 2. Se já tem peça selecionada e clicou em destino válido
+      // 2. Clicou em casa de destino
       if (selectedSquare) {
-        const isMoveTarget = validMoves.some(m => m.r === r && m.c === c);
-        if (isMoveTarget) {
-          executeMove(selectedSquare, { r, c });
+        const isValid = validMoves.some(m => m.r === r && m.c === c);
+        if (isValid) {
+          executePlayerMove(selectedSquare, { r, c });
         } else {
           selectedSquare = null;
           validMoves = [];
-          renderHighlights();
+          clearHighlights();
         }
       }
     }
