@@ -15,7 +15,7 @@
     :root {
       --gold: #f39c12;
       --titans-blue: #00d2d3;
-      --glass-bg: rgba(18, 22, 34, 0.88);
+      --glass-bg: rgba(18, 22, 34, 0.92);
     }
 
     * {
@@ -55,22 +55,22 @@
       display: flex;
     }
 
-    /* Interface Estilo Aero Glass do Windows 7 */
+    /* Menu Inicial */
     .card {
       background: var(--glass-bg);
       border: 1px solid rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(16px);
       border-radius: 18px;
-      padding: 32px 28px;
+      padding: 30px 24px;
       width: 90%;
       max-width: 420px;
       text-align: center;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
       z-index: 10;
     }
 
     h1 {
-      font-size: 2.1rem;
+      font-size: 2rem;
       font-weight: 800;
       letter-spacing: 1px;
       color: #ffffff;
@@ -83,9 +83,9 @@
     }
 
     p.subtitle {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #a4b0be;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .form-group {
@@ -175,12 +175,12 @@
     .hud-titans {
       position: absolute;
       top: 14px;
-      width: 90%;
+      width: 92%;
       max-width: 580px;
-      background: rgba(15, 18, 28, 0.85);
+      background: rgba(15, 18, 28, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(10px);
-      padding: 10px 20px;
+      padding: 8px 18px;
       border-radius: 30px;
       display: flex;
       justify-content: space-between;
@@ -194,7 +194,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 700;
     }
 
@@ -224,24 +224,26 @@
     .turn-bar {
       position: absolute;
       bottom: 20px;
-      background: rgba(15, 18, 28, 0.85);
+      background: rgba(15, 18, 28, 0.88);
       border: 1px solid rgba(0, 210, 211, 0.4);
-      padding: 10px 24px;
+      padding: 8px 20px;
       border-radius: 20px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #fff;
       font-weight: bold;
       z-index: 10;
       pointer-events: none;
       backdrop-filter: blur(8px);
       letter-spacing: 0.5px;
+      text-align: center;
+      max-width: 90%;
     }
 
     /* Modal de Vitória */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       display: none;
       align-items: center;
       justify-content: center;
@@ -267,7 +269,7 @@
   <div id="screen-lobby" class="screen active">
     <div class="card">
       <h1>CHESS <span>TITANS</span></h1>
-      <p class="subtitle">O visual clássico de madeira envernizada e anéis de luz.</p>
+      <p class="subtitle">O visual clássico com madeira nobre e anéis luminosos.</p>
 
       <div class="form-group">
         <label>Seu Nome ou Apelido</label>
@@ -284,7 +286,7 @@
       </div>
 
       <button class="btn-dark" onclick="joinHostOnline()">Entrar na Sala (Peças Pretas)</button>
-      <button class="btn-dark" style="margin-top: 14px;" onclick="startLocalPlay()">Jogar Offline (Passa e Joga no mesmo aparelho)</button>
+      <button class="btn-dark" style="margin-top: 12px;" onclick="startLocalPlay()">Jogar Offline no Mesmo Aparelho</button>
     </div>
   </div>
 
@@ -292,13 +294,13 @@
   <div id="screen-waiting" class="screen">
     <div class="card">
       <h2>Sala Criada!</h2>
-      <p style="margin-top: 8px; font-size: 0.9rem; color: #a4b0be;">Envie este código para ela conectar:</p>
+      <p style="margin-top: 8px; font-size: 0.9rem; color: #a4b0be;">Digite este código de 5 dígitos no celular dela:</p>
       <div class="room-badge" id="display-room-code">-----</div>
-      <p style="font-size: 0.85rem; color: #7f8c8d;">A partida abrirá no tabuleiro assim que ela entrar.</p>
+      <p style="font-size: 0.85rem; color: #7f8c8d;">As peças e o tabuleiro abrirão assim que ela conectar.</p>
     </div>
   </div>
 
-  <!-- TELA 3: TABULEIRO CHESS TITANS -->
+  <!-- TELA 3: TABULEIRO 3D -->
   <div id="screen-game" class="screen">
     <div id="canvas-container"></div>
 
@@ -327,7 +329,6 @@
   </div>
 
   <script>
-    // Sintetizador Nativo Web Audio API (Lances suaves do Chess Titans)
     class TitansAudio {
       constructor() { this.ctx = null; }
       init() {
@@ -383,12 +384,12 @@
     }
     const sfx = new TitansAudio();
 
-    // Rede WebRTC com servidores STUN públicos Google
     const PEER_CONFIG = {
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' }
         ]
       }
     };
@@ -401,20 +402,16 @@
     let myName = "Jogador 1";
     let oppName = "Jogador 2";
 
-    // Tabuleiro Lógico 8x8
     let boardState = [];
     let currentTurn = 'w';
     let selectedSquare = null;
     let validMoves = [];
 
-    // Three.js
     let scene, camera, renderer, controls;
-    let boardGroup, highlightGroup;
-    let piecesMatrix = Array(8).fill(null).map(() => Array(8).fill(null)); // Armazena instâncias das malhas 3D
+    let boardGroup, piecesGroup, highlightGroup;
     let raycaster, mouse;
     let pointerDownPos = { x: 0, y: 0 };
 
-    // Materiais compartilhados para evitar alocação repetida na memória
     let whitePieceMat, blackPieceMat;
 
     function switchScreen(id) {
@@ -422,7 +419,6 @@
       document.getElementById(id).classList.add('active');
     }
 
-    // ================= CONEXÃO P2P =================
     function startHostOnline() {
       sfx.init();
       myName = document.getElementById('player-name').value.trim() || 'Brancas';
@@ -447,7 +443,7 @@
 
       peer.on('error', (err) => {
         console.error(err);
-        alert("Erro no servidor PeerJS. Tente novamente ou utilize o modo offline.");
+        alert("Erro no servidor PeerJS. Tente novamente em alguns instantes.");
       });
     }
 
@@ -500,26 +496,37 @@
         initThreeJS();
 
         if (isHost) {
-          conn.send({ type: 'HANDSHAKE', name: myName });
           initBoard();
+          conn.send({
+            type: 'INIT_SYNC',
+            hostName: myName,
+            board: boardState,
+            turn: currentTurn
+          });
         } else {
-          conn.send({ type: 'HANDSHAKE', name: myName });
+          conn.send({ type: 'REQUEST_SYNC', name: myName });
         }
       });
 
       conn.on('data', (data) => {
-        if (data.type === 'HANDSHAKE') {
+        if (data.type === 'REQUEST_SYNC') {
           oppName = data.name;
-          if (isHost) {
-            conn.send({ type: 'SYNC_NAMES', hostName: myName, clientName: oppName });
-            broadcastSync();
-          }
+          conn.send({
+            type: 'INIT_SYNC',
+            hostName: myName,
+            board: boardState,
+            turn: currentTurn
+          });
           updateHUD();
-        } else if (data.type === 'SYNC_NAMES') {
+        } else if (data.type === 'INIT_SYNC') {
+          // O celular recebe todo o estado do jogo e constrói as peças
           oppName = data.hostName;
+          boardState = data.board;
+          currentTurn = data.turn;
+          renderAllPieces();
           updateHUD();
         } else if (data.type === 'SYNC_MOVE') {
-          applyMoveToLogicalAndVisual(data.from, data.to);
+          applyMoveLogicalAndVisual(data.from, data.to);
           currentTurn = data.turn;
           if (data.action === 'capture') sfx.playCapture();
           else sfx.playMove();
@@ -531,12 +538,12 @@
       });
 
       conn.on('close', () => {
-        alert("A conexão com o oponente foi perdida!");
+        alert("A conexão com o outro dispositivo foi encerrada!");
         location.reload();
       });
     }
 
-    // ================= LÓGICA E REGRAS DE XADREZ =================
+    // ================= LÓGICA DO TABULEIRO =================
     function initBoard() {
       boardState = Array(8).fill(null).map(() => Array(8).fill(null));
       const order = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
@@ -554,22 +561,9 @@
 
       document.getElementById('modal-victory').style.display = 'none';
 
-      spawnAllPiecesOnce();
+      renderAllPieces();
       clearHighlights();
       updateHUD();
-    }
-
-    function broadcastSync(moveData = null, action = null) {
-      if (!isHost || !conn || !conn.open) return;
-      if (moveData) {
-        conn.send({
-          type: 'SYNC_MOVE',
-          from: moveData.from,
-          to: moveData.to,
-          turn: currentTurn,
-          action: action
-        });
-      }
     }
 
     function getValidMoves(r, c) {
@@ -653,35 +647,41 @@
       return moves;
     }
 
-    // Reposiciona a malha 3D instantaneamente sem recriar objetos (0ms de latência)
-    function applyMoveToLogicalAndVisual(from, to) {
+    function applyMoveLogicalAndVisual(from, to) {
       const piece = boardState[from.r][from.c];
       const target = boardState[to.r][to.c];
       const isCapture = (target !== null);
 
-      // Remove a peça visual capturada
-      if (piecesMatrix[to.r][to.c]) {
-        scene.remove(piecesMatrix[to.r][to.c]);
-        piecesMatrix[to.r][to.c] = null;
+      // Localiza a peça visual de origem e remove a peça de destino se houver
+      let pieceMesh = null;
+      const toRemove = [];
+
+      for (let i = 0; i < piecesGroup.children.length; i++) {
+        const child = piecesGroup.children[i];
+        if (child.userData.r === to.r && child.userData.c === to.c) {
+          toRemove.push(child);
+        } else if (child.userData.r === from.r && child.userData.c === from.c) {
+          pieceMesh = child;
+        }
       }
 
-      // Move a peça visual existente
-      const pieceMesh = piecesMatrix[from.r][from.c];
+      toRemove.forEach(m => piecesGroup.remove(m));
+
       if (pieceMesh) {
         pieceMesh.position.set((to.c - 3.5) * 2.0, 0.15, (to.r - 3.5) * 2.0);
-        piecesMatrix[to.r][to.c] = pieceMesh;
-        piecesMatrix[from.r][from.c] = null;
+        pieceMesh.userData.r = to.r;
+        pieceMesh.userData.c = to.c;
       }
 
-      // Promoção visual rápida
-      if (piece.type === 'P' && ((piece.color === 'w' && to.r === 0) || (piece.color === 'b' && to.r === 7))) {
+      // Promoção de Peão
+      if (piece && piece.type === 'P' && ((piece.color === 'w' && to.r === 0) || (piece.color === 'b' && to.r === 7))) {
         piece.type = 'Q';
         if (pieceMesh) {
-          scene.remove(pieceMesh);
+          piecesGroup.remove(pieceMesh);
           const newQueen = buildPieceMesh('Q', piece.color);
           newQueen.position.set((to.c - 3.5) * 2.0, 0.15, (to.r - 3.5) * 2.0);
-          scene.add(newQueen);
-          piecesMatrix[to.r][to.c] = newQueen;
+          newQueen.userData = { r: to.r, c: to.c };
+          piecesGroup.add(newQueen);
         }
       }
 
@@ -692,7 +692,7 @@
     }
 
     function executePlayerMove(from, to) {
-      const isCapture = applyMoveToLogicalAndVisual(from, to);
+      const isCapture = applyMoveLogicalAndVisual(from, to);
 
       currentTurn = (currentTurn === 'w') ? 'b' : 'w';
       selectedSquare = null;
@@ -704,10 +704,6 @@
       else sfx.playMove();
 
       if (isLocal) {
-        updateHUD();
-        checkGameOver();
-      } else if (isHost) {
-        broadcastSync({ from, to }, action);
         updateHUD();
         checkGameOver();
       } else {
@@ -787,7 +783,7 @@
       }
     }
 
-    // ================= MOTOR 3D ESTILO CHESS TITANS =================
+    // ================= MOTOR THREE.JS COMPATÍVEL COM CELULARES =================
     function initThreeJS() {
       const container = document.getElementById('canvas-container');
       container.innerHTML = '';
@@ -795,62 +791,49 @@
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x110d0a);
 
-      camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const isMobile = window.innerWidth < 600;
+      camera = new THREE.PerspectiveCamera(isMobile ? 48 : 38, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-      // Posição angular frontal clássica do Chess Titans do Windows
+      // Câmera posicionada de frente para o lado de cada um
       if (myColor === 'b') {
-        camera.position.set(0, 20, -21);
+        camera.position.set(0, isMobile ? 24 : 20, isMobile ? -25 : -21);
       } else {
-        camera.position.set(0, 20, 21);
+        camera.position.set(0, isMobile ? 24 : 20, isMobile ? 25 : 21);
       }
 
-      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
       controls.maxPolarAngle = Math.PI / 2.2;
-      controls.minDistance = 12;
-      controls.maxDistance = 32;
+      controls.minDistance = 10;
+      controls.maxDistance = 35;
       controls.target.set(0, 0, 0);
 
-      // Materiais Únicos Compartilhados (Alta performance)
-      whitePieceMat = new THREE.MeshStandardMaterial({
-        color: 0xf4eee1,
-        roughness: 0.15,
-        metalness: 0.05
-      });
+      // Materiais seguros para GPUs de celular
+      whitePieceMat = new THREE.MeshLambertMaterial({ color: 0xfbf6ec });
+      blackPieceMat = new THREE.MeshLambertMaterial({ color: 0x181513 });
 
-      blackPieceMat = new THREE.MeshStandardMaterial({
-        color: 0x161311,
-        roughness: 0.25,
-        metalness: 0.2
-      });
-
-      // Luz ambiente aconchegante e iluminação quente de madeira
-      const ambientLight = new THREE.AmbientLight(0xffedd8, 0.75);
+      const ambientLight = new THREE.AmbientLight(0xffedd8, 0.85);
       scene.add(ambientLight);
 
-      const mainLight = new THREE.DirectionalLight(0xffffff, 1.1);
-      mainLight.position.set(8, 22, 10);
-      mainLight.castShadow = true;
-      mainLight.shadow.mapSize.width = 2048;
-      mainLight.shadow.mapSize.height = 2048;
-      mainLight.shadow.bias = -0.0003;
-      scene.add(mainLight);
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+      dirLight.position.set(10, 25, 12);
+      scene.add(dirLight);
 
-      const rimLight = new THREE.DirectionalLight(0x00d2d3, 0.35);
-      rimLight.position.set(-12, 8, -12);
+      const rimLight = new THREE.DirectionalLight(0x00d2d3, 0.4);
+      rimLight.position.set(-12, 10, -12);
       scene.add(rimLight);
 
       boardGroup = new THREE.Group();
+      piecesGroup = new THREE.Group();
       highlightGroup = new THREE.Group();
       scene.add(boardGroup);
+      scene.add(piecesGroup);
       scene.add(highlightGroup);
 
       raycaster = new THREE.Raycaster();
@@ -860,7 +843,6 @@
 
       window.addEventListener('resize', onResize);
 
-      // Registro rápido de ponteiro (Elimina overhead do [Violation])
       renderer.domElement.addEventListener('pointerdown', (e) => {
         pointerDownPos.x = e.clientX;
         pointerDownPos.y = e.clientY;
@@ -868,7 +850,7 @@
 
       renderer.domElement.addEventListener('pointerup', (e) => {
         const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
-        if (dist < 6) {
+        if (dist < 8) {
           handleBoardClick(e);
         }
       });
@@ -877,58 +859,51 @@
     }
 
     function onResize() {
+      if (!camera || !renderer) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    // Tabuleiro Clássico de Madeira Envernizada do Windows 7
     function buildTitansBoard() {
       // 1. Mesa de Madeira ao Fundo
       const tableGeo = new THREE.BoxGeometry(28, 0.5, 28);
-      const tableMat = new THREE.MeshStandardMaterial({ color: 0x1a120b, roughness: 0.5 });
+      const tableMat = new THREE.MeshLambertMaterial({ color: 0x1a120b });
       const tableMesh = new THREE.Mesh(tableGeo, tableMat);
       tableMesh.position.y = -0.7;
-      tableMesh.receiveShadow = true;
       boardGroup.add(tableMesh);
 
-      // 2. Moldura Chanfrada Espessa de Carvalho Nobre
+      // 2. Moldura de Carvalho Envernizado
       const borderGeo = new THREE.BoxGeometry(17.8, 0.8, 17.8);
-      const borderMat = new THREE.MeshStandardMaterial({
-        color: 0x3d2314,
-        roughness: 0.3,
-        metalness: 0.1
-      });
+      const borderMat = new THREE.MeshLambertMaterial({ color: 0x3d2314 });
       const borderMesh = new THREE.Mesh(borderGeo, borderMat);
       borderMesh.position.y = -0.35;
-      borderMesh.receiveShadow = true;
       boardGroup.add(borderMesh);
 
       // 3. Moldura Interna Dourada
       const goldEdgeGeo = new THREE.BoxGeometry(16.5, 0.85, 16.5);
-      const goldEdgeMat = new THREE.MeshStandardMaterial({ color: 0x8a6326, roughness: 0.35, metalness: 0.8 });
+      const goldEdgeMat = new THREE.MeshLambertMaterial({ color: 0x8a6326 });
       const goldEdgeMesh = new THREE.Mesh(goldEdgeGeo, goldEdgeMat);
       goldEdgeMesh.position.y = -0.34;
       boardGroup.add(goldEdgeMesh);
 
-      // 4. Casas em Madeira Clara (Bordo) e Escura (Nogueira)
+      // 4. Casas em Madeira Clara e Escura
       const sqGeo = new THREE.BoxGeometry(2.0, 0.2, 2.0);
-      const lightWood = new THREE.MeshStandardMaterial({ color: 0xedd6b1, roughness: 0.35 });
-      const darkWood = new THREE.MeshStandardMaterial({ color: 0x6e3c1e, roughness: 0.4 });
+      const lightWood = new THREE.MeshLambertMaterial({ color: 0xedd6b1 });
+      const darkWood = new THREE.MeshLambertMaterial({ color: 0x6e3c1e });
 
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           const isLight = (r + c) % 2 === 0;
           const sq = new THREE.Mesh(sqGeo, isLight ? lightWood : darkWood);
           sq.position.set((c - 3.5) * 2.0, 0.05, (r - 3.5) * 2.0);
-          sq.receiveShadow = true;
           sq.userData = { r, c };
           boardGroup.add(sq);
         }
       }
     }
 
-    // Geometrias das Peças Estilo Chess Titans
+    // Geometria unificada de alto desempenho (Compatível com celulares)
     function buildPieceMesh(type, color) {
       const group = new THREE.Group();
       const mat = (color === 'w') ? whitePieceMat : blackPieceMat;
@@ -937,36 +912,34 @@
         const m = new THREE.Mesh(geo, mat);
         m.position.y = y;
         m.scale.set(sX, 1, sZ);
-        m.castShadow = true;
-        m.receiveShadow = true;
         group.add(m);
       }
 
       // Base arredondada esmaltada
-      add(new THREE.CylinderGeometry(0.72, 0.78, 0.22, 24), 0.11);
-      add(new THREE.CylinderGeometry(0.58, 0.68, 0.16, 24), 0.28);
-      add(new THREE.CylinderGeometry(0.38, 0.52, 0.6, 20), 0.62);
+      add(new THREE.CylinderGeometry(0.7, 0.78, 0.22, 16), 0.11);
+      add(new THREE.CylinderGeometry(0.56, 0.68, 0.16, 16), 0.28);
+      add(new THREE.CylinderGeometry(0.36, 0.5, 0.6, 14), 0.62);
 
       if (type === 'P') { // Peão
-        add(new THREE.CylinderGeometry(0.42, 0.38, 0.12, 20), 0.96);
-        add(new THREE.SphereGeometry(0.42, 20, 20), 1.34);
+        add(new THREE.CylinderGeometry(0.4, 0.36, 0.12, 14), 0.96);
+        add(new THREE.SphereGeometry(0.42, 14, 14), 1.34);
       } else if (type === 'R') { // Torre
-        add(new THREE.CylinderGeometry(0.52, 0.42, 0.7, 20), 1.05);
-        add(new THREE.CylinderGeometry(0.62, 0.56, 0.4, 16), 1.55);
+        add(new THREE.CylinderGeometry(0.5, 0.42, 0.7, 14), 1.05);
+        add(new THREE.CylinderGeometry(0.6, 0.55, 0.4, 12), 1.55);
       } else if (type === 'N') { // Cavalo
-        add(new THREE.BoxGeometry(0.45, 0.8, 0.75), 1.25);
-        add(new THREE.SphereGeometry(0.36, 16, 16), 1.55, 0.8, 1.2);
+        add(new THREE.BoxGeometry(0.42, 0.78, 0.75), 1.25);
+        add(new THREE.SphereGeometry(0.35, 12, 12), 1.55, 0.8, 1.2);
       } else if (type === 'B') { // Bispo
-        add(new THREE.CylinderGeometry(0.45, 0.35, 0.75, 20), 1.15);
-        add(new THREE.SphereGeometry(0.42, 20, 20), 1.6, 0.8, 1.0);
-        add(new THREE.SphereGeometry(0.12, 12, 12), 2.05);
+        add(new THREE.CylinderGeometry(0.44, 0.34, 0.75, 14), 1.15);
+        add(new THREE.SphereGeometry(0.4, 14, 14), 1.6, 0.8, 1.0);
+        add(new THREE.SphereGeometry(0.12, 10, 10), 2.05);
       } else if (type === 'Q') { // Rainha
-        add(new THREE.CylinderGeometry(0.48, 0.36, 0.95, 24), 1.25);
-        add(new THREE.CylinderGeometry(0.64, 0.32, 0.38, 24), 1.85);
-        add(new THREE.SphereGeometry(0.16, 14, 14), 2.12);
+        add(new THREE.CylinderGeometry(0.46, 0.36, 0.95, 16), 1.25);
+        add(new THREE.CylinderGeometry(0.62, 0.32, 0.38, 16), 1.85);
+        add(new THREE.SphereGeometry(0.16, 12, 12), 2.12);
       } else if (type === 'K') { // Rei
-        add(new THREE.CylinderGeometry(0.52, 0.38, 1.15, 24), 1.35);
-        add(new THREE.CylinderGeometry(0.64, 0.46, 0.38, 24), 1.95);
+        add(new THREE.CylinderGeometry(0.5, 0.38, 1.15, 16), 1.35);
+        add(new THREE.CylinderGeometry(0.62, 0.46, 0.38, 16), 1.95);
         add(new THREE.BoxGeometry(0.12, 0.42, 0.12), 2.3);
         add(new THREE.BoxGeometry(0.34, 0.12, 0.12), 2.34);
       }
@@ -974,38 +947,32 @@
       return group;
     }
 
-    function spawnAllPiecesOnce() {
-      // Remove peças antigas se houver
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          if (piecesMatrix[r][c]) {
-            scene.remove(piecesMatrix[r][c]);
-            piecesMatrix[r][c] = null;
-          }
-        }
+    function renderAllPieces() {
+      // Limpa todas as peças do grupo
+      while (piecesGroup.children.length > 0) {
+        piecesGroup.remove(piecesGroup.children[0]);
       }
 
-      // Cria as instâncias das peças apenas 1 vez no início do jogo
+      // Constrói todas as peças existentes no estado lógico
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           const piece = boardState[r][c];
           if (piece) {
             const mesh = buildPieceMesh(piece.type, piece.color);
             mesh.position.set((c - 3.5) * 2.0, 0.15, (r - 3.5) * 2.0);
-            scene.add(mesh);
-            piecesMatrix[r][c] = mesh;
+            mesh.userData = { r, c };
+            piecesGroup.add(mesh);
           }
         }
       }
     }
 
-    // Anéis Luminosos Azuis Neon do Chess Titans
+    // Anéis Luminosos Azuis Neon
     function renderHighlights() {
       clearHighlights();
 
-      // 1. Anel Neon Ciano Debaixo da Peça Selecionada
       if (selectedSquare) {
-        const ringGeo = new THREE.RingGeometry(0.65, 0.95, 32);
+        const ringGeo = new THREE.RingGeometry(0.65, 0.95, 24);
         const ringMat = new THREE.MeshBasicMaterial({
           color: 0x00d2d3,
           side: THREE.DoubleSide,
@@ -1018,15 +985,14 @@
         highlightGroup.add(m);
       }
 
-      // 2. Discos de Luz Ciano e Vermelha nos Movimentos Válidos
       validMoves.forEach(tgt => {
         const isEnemy = (boardState[tgt.r][tgt.c] !== null);
-        const targetGeo = new THREE.RingGeometry(0.4, 0.88, 32);
+        const targetGeo = new THREE.RingGeometry(0.4, 0.88, 24);
         const targetMat = new THREE.MeshBasicMaterial({
           color: isEnemy ? 0xff4757 : 0x00d2d3,
           side: THREE.DoubleSide,
           transparent: true,
-          opacity: 0.55
+          opacity: 0.6
         });
         const m = new THREE.Mesh(targetGeo, targetMat);
         m.rotation.x = -Math.PI / 2;
@@ -1041,7 +1007,6 @@
       }
     }
 
-    // Clique ultra-otimizado (testa apenas as 64 casas estáticas do tabuleiro)
     function handleBoardClick(event) {
       if (!isLocal && currentTurn !== myColor) return;
 
@@ -1051,7 +1016,6 @@
 
       raycaster.setFromCamera(mouse, camera);
 
-      // O Raycaster testa apenas o grupo do tabuleiro (zero lag na thread principal)
       const intersects = raycaster.intersectObjects(boardGroup.children, false);
       if (intersects.length === 0) return;
 
@@ -1064,7 +1028,6 @@
       const piece = boardState[r][c];
       const isMyPiece = piece && (isLocal ? piece.color === currentTurn : piece.color === myColor);
 
-      // 1. Clicou na peça própria
       if (isMyPiece) {
         selectedSquare = { r, c };
         validMoves = getValidMoves(r, c);
@@ -1073,7 +1036,6 @@
         return;
       }
 
-      // 2. Clicou em casa de destino
       if (selectedSquare) {
         const isValid = validMoves.some(m => m.r === r && m.c === c);
         if (isValid) {
