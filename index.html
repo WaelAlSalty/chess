@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Chess Titans - Edição Clássica Windows</title>
+  <title>Chess Titans - Com Xeque Real e Contornos</title>
 
   <!-- Three.js e OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -15,7 +15,8 @@
     :root {
       --gold: #f39c12;
       --titans-blue: #00d2d3;
-      --glass-bg: rgba(18, 22, 34, 0.92);
+      --danger: #e74c3c;
+      --glass-bg: rgba(18, 22, 34, 0.94);
     }
 
     * {
@@ -55,7 +56,7 @@
       display: flex;
     }
 
-    /* Menu Inicial */
+    /* Menus Iniciais */
     .card {
       background: var(--glass-bg);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -177,7 +178,7 @@
       top: 14px;
       width: 92%;
       max-width: 580px;
-      background: rgba(15, 18, 28, 0.88);
+      background: rgba(15, 18, 28, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(10px);
       padding: 8px 18px;
@@ -224,7 +225,7 @@
     .turn-bar {
       position: absolute;
       bottom: 20px;
-      background: rgba(15, 18, 28, 0.88);
+      background: rgba(15, 18, 28, 0.9);
       border: 1px solid rgba(0, 210, 211, 0.4);
       padding: 8px 20px;
       border-radius: 20px;
@@ -237,6 +238,19 @@
       letter-spacing: 0.5px;
       text-align: center;
       max-width: 90%;
+      transition: all 0.2s ease;
+    }
+
+    .turn-bar.in-check {
+      border-color: var(--danger);
+      color: var(--danger);
+      box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+      animation: pulseCheck 1s infinite alternate;
+    }
+
+    @keyframes pulseCheck {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
     }
 
     /* Modal de Vitória */
@@ -269,14 +283,14 @@
   <div id="screen-lobby" class="screen active">
     <div class="card">
       <h1>CHESS <span>TITANS</span></h1>
-      <p class="subtitle">O visual clássico com madeira nobre e anéis luminosos.</p>
+      <p class="subtitle">Regras Oficiais com Xeque Rigoroso e Contornos 3D.</p>
 
       <div class="form-group">
         <label>Seu Nome ou Apelido</label>
         <input type="text" id="player-name" placeholder="Ex: Lucas" value="Jogador 1">
       </div>
 
-      <button class="btn-blue" onclick="startHostOnline()">Criar Sala Online (Peças Brancas)</button>
+      <button class="btn-blue" onclick="startHostOnline()">Criar Sala Online (Brancas)</button>
 
       <div style="margin: 14px 0; color: #7f8c8d; font-size: 0.75rem; letter-spacing: 2px; font-weight: bold;">OU ENTRAR</div>
 
@@ -285,7 +299,7 @@
         <input type="text" id="join-code" placeholder="Ex: 48215" maxlength="5">
       </div>
 
-      <button class="btn-dark" onclick="joinHostOnline()">Entrar na Sala (Peças Pretas)</button>
+      <button class="btn-dark" onclick="joinHostOnline()">Entrar na Sala (Pretas)</button>
       <button class="btn-dark" style="margin-top: 12px;" onclick="startLocalPlay()">Jogar Offline no Mesmo Aparelho</button>
     </div>
   </div>
@@ -294,9 +308,9 @@
   <div id="screen-waiting" class="screen">
     <div class="card">
       <h2>Sala Criada!</h2>
-      <p style="margin-top: 8px; font-size: 0.9rem; color: #a4b0be;">Digite este código de 5 dígitos no celular dela:</p>
+      <p style="margin-top: 8px; font-size: 0.9rem; color: #a4b0be;">Digite este código de 5 dígitos no outro celular:</p>
       <div class="room-badge" id="display-room-code">-----</div>
-      <p style="font-size: 0.85rem; color: #7f8c8d;">As peças e o tabuleiro abrirão assim que ela conectar.</p>
+      <p style="font-size: 0.85rem; color: #7f8c8d;">O tabuleiro e as peças abrirão assim que conectar.</p>
     </div>
   </div>
 
@@ -319,7 +333,7 @@
     <div class="turn-bar" id="status-turn">Vez das Brancas</div>
   </div>
 
-  <!-- MODAL DE VITÓRIA -->
+  <!-- MODAL DE FINAL DE JOGO -->
   <div class="modal-overlay" id="modal-victory">
     <div class="modal-card">
       <h2 id="winner-title" style="color: var(--titans-blue); font-size: 1.8rem; margin-bottom: 10px;">XEQUE-MATE</h2>
@@ -343,7 +357,7 @@
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.08);
         gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
@@ -365,6 +379,20 @@
         gain.connect(this.ctx.destination);
         osc.start();
         osc.stop(this.ctx.currentTime + 0.12);
+      }
+      playCheck() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(480, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(240, this.ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.2);
       }
       playVictory() {
         this.init();
@@ -388,8 +416,7 @@
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' }
         ]
       }
     };
@@ -412,7 +439,7 @@
     let raycaster, mouse;
     let pointerDownPos = { x: 0, y: 0 };
 
-    let whitePieceMat, blackPieceMat;
+    let whitePieceMat, blackPieceMat, outlineMatWhite, outlineMatBlack;
 
     function switchScreen(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -443,7 +470,7 @@
 
       peer.on('error', (err) => {
         console.error(err);
-        alert("Erro no servidor PeerJS. Tente novamente em alguns instantes.");
+        alert("Erro no servidor PeerJS. Tente novamente.");
       });
     }
 
@@ -519,7 +546,6 @@
           });
           updateHUD();
         } else if (data.type === 'INIT_SYNC') {
-          // O celular recebe todo o estado do jogo e constrói as peças
           oppName = data.hostName;
           boardState = data.board;
           currentTurn = data.turn;
@@ -530,6 +556,11 @@
           currentTurn = data.turn;
           if (data.action === 'capture') sfx.playCapture();
           else sfx.playMove();
+
+          if (isKingInCheck(currentTurn, boardState)) {
+            sfx.playCheck();
+          }
+
           updateHUD();
           checkGameOver();
         } else if (data.type === 'RESTART') {
@@ -538,12 +569,12 @@
       });
 
       conn.on('close', () => {
-        alert("A conexão com o outro dispositivo foi encerrada!");
+        alert("A conexão com o outro aparelho caiu!");
         location.reload();
       });
     }
 
-    // ================= LÓGICA DO TABULEIRO =================
+    // ================= LÓGICA E REGRAS REAIS DE XEQUE =================
     function initBoard() {
       boardState = Array(8).fill(null).map(() => Array(8).fill(null));
       const order = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
@@ -566,23 +597,26 @@
       updateHUD();
     }
 
-    function getValidMoves(r, c) {
-      const piece = boardState[r][c];
+    function inBounds(row, col) {
+      return row >= 0 && row < 8 && col >= 0 && col < 8;
+    }
+
+    // Movimentos brutos (sem filtro de auto-xeque)
+    function getPseudoLegalMoves(r, c, board) {
+      const piece = board[r][c];
       if (!piece) return [];
 
       const moves = [];
       const color = piece.color;
       const enemy = color === 'w' ? 'b' : 'w';
 
-      function inBounds(row, col) { return row >= 0 && row < 8 && col >= 0 && col < 8; }
-
       if (piece.type === 'P') {
         const dir = color === 'w' ? -1 : 1;
         const startRow = color === 'w' ? 6 : 1;
 
-        if (inBounds(r + dir, c) && !boardState[r + dir][c]) {
+        if (inBounds(r + dir, c) && !board[r + dir][c]) {
           moves.push({ r: r + dir, c: c });
-          if (r === startRow && !boardState[r + dir * 2][c]) {
+          if (r === startRow && !board[r + dir * 2][c]) {
             moves.push({ r: r + dir * 2, c: c });
           }
         }
@@ -590,7 +624,7 @@
         [-1, 1].forEach(dc => {
           const nr = r + dir;
           const nc = c + dc;
-          if (inBounds(nr, nc) && boardState[nr][nc] && boardState[nr][nc].color === enemy) {
+          if (inBounds(nr, nc) && board[nr][nc] && board[nr][nc].color === enemy) {
             moves.push({ r: nr, c: nc });
           }
         });
@@ -604,7 +638,7 @@
             const nc = c + dc * step;
             if (!inBounds(nr, nc)) break;
 
-            const target = boardState[nr][nc];
+            const target = board[nr][nc];
             if (!target) {
               moves.push({ r: nr, c: nc });
             } else {
@@ -626,7 +660,7 @@
           const nr = r + dr;
           const nc = c + dc;
           if (inBounds(nr, nc)) {
-            const target = boardState[nr][nc];
+            const target = board[nr][nc];
             if (!target || target.color === enemy) moves.push({ r: nr, c: nc });
           }
         });
@@ -638,7 +672,7 @@
           const nr = r + dr;
           const nc = c + dc;
           if (inBounds(nr, nc)) {
-            const target = boardState[nr][nc];
+            const target = board[nr][nc];
             if (!target || target.color === enemy) moves.push({ r: nr, c: nc });
           }
         });
@@ -647,12 +681,92 @@
       return moves;
     }
 
+    // Verifica se o Rei de uma determinada cor está em perigo
+    function isKingInCheck(color, board) {
+      let kingR = -1;
+      let kingC = -1;
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p && p.type === 'K' && p.color === color) {
+            kingR = r;
+            kingC = c;
+            break;
+          }
+        }
+        if (kingR !== -1) break;
+      }
+
+      if (kingR === -1) return true; // Rei capturado (segurança)
+
+      const enemy = (color === 'w') ? 'b' : 'w';
+
+      // Checa se qualquer peça inimiga ataca a posição do Rei
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p && p.color === enemy) {
+            if (p.type === 'P') {
+              const dir = (enemy === 'w') ? -1 : 1;
+              if (r + dir === kingR && (c - 1 === kingC || c + 1 === kingC)) {
+                return true;
+              }
+            } else {
+              const moves = getPseudoLegalMoves(r, c, board);
+              if (moves.some(m => m.r === kingR && m.c === kingC)) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      return false;
+    }
+
+    // Movimentos 100% legais pelas regras oficiais (NÃO PERMITE ENTREGAR O REI)
+    function getStrictLegalMoves(r, c) {
+      const piece = boardState[r][c];
+      if (!piece) return [];
+
+      const pseudo = getPseudoLegalMoves(r, c, boardState);
+      const legal = [];
+
+      for (const m of pseudo) {
+        // Simula o lance em tabuleiro clone
+        const nextBoard = boardState.map(row => row.map(cell => cell ? { ...cell } : null));
+        nextBoard[m.r][m.c] = nextBoard[r][c];
+        nextBoard[r][c] = null;
+
+        // Se o próprio Rei NÃO ficar em xeque após o lance, ele é permitido
+        if (!isKingInCheck(piece.color, nextBoard)) {
+          legal.push(m);
+        }
+      }
+
+      return legal;
+    }
+
+    // Verifica se o jogador da vez tem qualquer movimento legal possível
+    function hasAnyLegalMoves(color) {
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = boardState[r][c];
+          if (p && p.color === color) {
+            const moves = getStrictLegalMoves(r, c);
+            if (moves.length > 0) return true;
+          }
+        }
+      }
+      return false;
+    }
+
     function applyMoveLogicalAndVisual(from, to) {
       const piece = boardState[from.r][from.c];
       const target = boardState[to.r][to.c];
       const isCapture = (target !== null);
 
-      // Localiza a peça visual de origem e remove a peça de destino se houver
       let pieceMesh = null;
       const toRemove = [];
 
@@ -673,7 +787,7 @@
         pieceMesh.userData.c = to.c;
       }
 
-      // Promoção de Peão
+      // Promoção para Rainha
       if (piece && piece.type === 'P' && ((piece.color === 'w' && to.r === 0) || (piece.color === 'b' && to.r === 7))) {
         piece.type = 'Q';
         if (pieceMesh) {
@@ -703,6 +817,11 @@
       if (action === 'capture') sfx.playCapture();
       else sfx.playMove();
 
+      // Checa se o lance colocou o oponente em Xeque
+      if (isKingInCheck(currentTurn, boardState)) {
+        sfx.playCheck();
+      }
+
       if (isLocal) {
         updateHUD();
         checkGameOver();
@@ -720,29 +839,25 @@
     }
 
     function checkGameOver() {
-      let whiteKing = false;
-      let blackKing = false;
+      const inCheck = isKingInCheck(currentTurn, boardState);
+      const hasMoves = hasAnyLegalMoves(currentTurn);
 
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          const p = boardState[r][c];
-          if (p && p.type === 'K') {
-            if (p.color === 'w') whiteKing = true;
-            if (p.color === 'b') blackKing = true;
-          }
-        }
-      }
-
-      if (!whiteKing || !blackKing) {
+      if (!hasMoves) {
         sfx.playVictory();
-        const winner = whiteKing ? 'w' : 'b';
-        const isMe = (isLocal || winner === myColor);
+        if (inCheck) {
+          // XEQUE-MATE REAL
+          const winner = (currentTurn === 'w') ? 'b' : 'w';
+          const isMe = (isLocal || winner === myColor);
 
-        document.getElementById('winner-title').innerText = isMe ? "XEQUE-MATE! VITÓRIA 👑" : "XEQUE-MATE!";
-        document.getElementById('winner-desc').innerText = isMe
-          ? (whiteKing ? "As Brancas venceram a partida!" : "As Pretas venceram a partida!")
-          : "O adversário capturou seu Rei.";
-
+          document.getElementById('winner-title').innerText = "XEQUE-MATE! 👑";
+          document.getElementById('winner-desc').innerText = isMe
+            ? (winner === 'w' ? "As Brancas venceram com Xeque-mate legítimo!" : "As Pretas venceram com Xeque-mate legítimo!")
+            : "O oponente aplicou Xeque-mate.";
+        } else {
+          // REI AFOGADO (EMPATE)
+          document.getElementById('winner-title').innerText = "EMPATE (AFOGAMENTO)";
+          document.getElementById('winner-desc').innerText = "O jogador da vez não possui lances legais, mas não está em xeque.";
+        }
         document.getElementById('modal-victory').style.display = 'flex';
       }
     }
@@ -761,14 +876,22 @@
     function updateHUD() {
       const isWhiteTurn = (currentTurn === 'w');
       const isMyTurn = isLocal ? true : (currentTurn === myColor);
+      const inCheck = isKingInCheck(currentTurn, boardState);
 
       const statusEl = document.getElementById('status-turn');
-      if (isMyTurn) {
-        statusEl.innerText = isWhiteTurn ? "Sua vez de jogar (Brancas)" : "Sua vez de jogar (Pretas)";
-        statusEl.style.color = "#00d2d3";
+
+      if (inCheck) {
+        statusEl.classList.add('in-check');
+        statusEl.innerText = `⚠️ XEQUE! O Rei ${isWhiteTurn ? 'Branco' : 'Preto'} está sob ataque!`;
       } else {
-        statusEl.innerText = "Aguardando jogada do oponente...";
-        statusEl.style.color = "#a4b0be";
+        statusEl.classList.remove('in-check');
+        if (isMyTurn) {
+          statusEl.innerText = isWhiteTurn ? "Sua vez de jogar (Brancas)" : "Sua vez de jogar (Pretas)";
+          statusEl.style.color = "#00d2d3";
+        } else {
+          statusEl.innerText = "Aguardando jogada do oponente...";
+          statusEl.style.color = "#a4b0be";
+        }
       }
 
       document.getElementById('tag-white').classList.toggle('active-turn', isWhiteTurn);
@@ -783,7 +906,7 @@
       }
     }
 
-    // ================= MOTOR THREE.JS COMPATÍVEL COM CELULARES =================
+    // ================= MOTOR 3D COM CONTORNO DAS PEÇAS =================
     function initThreeJS() {
       const container = document.getElementById('canvas-container');
       container.innerHTML = '';
@@ -794,7 +917,6 @@
       const isMobile = window.innerWidth < 600;
       camera = new THREE.PerspectiveCamera(isMobile ? 48 : 38, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-      // Câmera posicionada de frente para o lado de cada um
       if (myColor === 'b') {
         camera.position.set(0, isMobile ? 24 : 20, isMobile ? -25 : -21);
       } else {
@@ -814,9 +936,13 @@
       controls.maxDistance = 35;
       controls.target.set(0, 0, 0);
 
-      // Materiais seguros para GPUs de celular
+      // Materiais Principais das Peças
       whitePieceMat = new THREE.MeshLambertMaterial({ color: 0xfbf6ec });
-      blackPieceMat = new THREE.MeshLambertMaterial({ color: 0x181513 });
+      blackPieceMat = new THREE.MeshLambertMaterial({ color: 0x1a1614 });
+
+      // Materiais de Contorno (Bordas nítidas Cel-Shading)
+      outlineMatWhite = new THREE.MeshBasicMaterial({ color: 0x5a483c, side: THREE.BackSide });
+      outlineMatBlack = new THREE.MeshBasicMaterial({ color: 0xd4af37, side: THREE.BackSide }); // Ouro sutil para contornar peças pretas
 
       const ambientLight = new THREE.AmbientLight(0xffedd8, 0.85);
       scene.add(ambientLight);
@@ -866,28 +992,24 @@
     }
 
     function buildTitansBoard() {
-      // 1. Mesa de Madeira ao Fundo
       const tableGeo = new THREE.BoxGeometry(28, 0.5, 28);
       const tableMat = new THREE.MeshLambertMaterial({ color: 0x1a120b });
       const tableMesh = new THREE.Mesh(tableGeo, tableMat);
       tableMesh.position.y = -0.7;
       boardGroup.add(tableMesh);
 
-      // 2. Moldura de Carvalho Envernizado
       const borderGeo = new THREE.BoxGeometry(17.8, 0.8, 17.8);
       const borderMat = new THREE.MeshLambertMaterial({ color: 0x3d2314 });
       const borderMesh = new THREE.Mesh(borderGeo, borderMat);
       borderMesh.position.y = -0.35;
       boardGroup.add(borderMesh);
 
-      // 3. Moldura Interna Dourada
       const goldEdgeGeo = new THREE.BoxGeometry(16.5, 0.85, 16.5);
       const goldEdgeMat = new THREE.MeshLambertMaterial({ color: 0x8a6326 });
       const goldEdgeMesh = new THREE.Mesh(goldEdgeGeo, goldEdgeMat);
       goldEdgeMesh.position.y = -0.34;
       boardGroup.add(goldEdgeMesh);
 
-      // 4. Casas em Madeira Clara e Escura
       const sqGeo = new THREE.BoxGeometry(2.0, 0.2, 2.0);
       const lightWood = new THREE.MeshLambertMaterial({ color: 0xedd6b1 });
       const darkWood = new THREE.MeshLambertMaterial({ color: 0x6e3c1e });
@@ -903,57 +1025,62 @@
       }
     }
 
-    // Geometria unificada de alto desempenho (Compatível com celulares)
+    // Constrói a peça com contorno tridimensional (Silhouette Back-Side Outline)
     function buildPieceMesh(type, color) {
       const group = new THREE.Group();
       const mat = (color === 'w') ? whitePieceMat : blackPieceMat;
+      const outlineMat = (color === 'w') ? outlineMatWhite : outlineMatBlack;
 
-      function add(geo, y, sX = 1, sZ = 1) {
+      function addWithOutline(geo, y, sX = 1, sZ = 1) {
+        // Peça principal
         const m = new THREE.Mesh(geo, mat);
         m.position.y = y;
         m.scale.set(sX, 1, sZ);
         group.add(m);
+
+        // Casca invertida do contorno (ligeiramente maior)
+        const outlineMesh = new THREE.Mesh(geo, outlineMat);
+        outlineMesh.position.y = y;
+        outlineMesh.scale.set(sX * 1.08, 1.05, sZ * 1.08);
+        group.add(outlineMesh);
       }
 
-      // Base arredondada esmaltada
-      add(new THREE.CylinderGeometry(0.7, 0.78, 0.22, 16), 0.11);
-      add(new THREE.CylinderGeometry(0.56, 0.68, 0.16, 16), 0.28);
-      add(new THREE.CylinderGeometry(0.36, 0.5, 0.6, 14), 0.62);
+      addWithOutline(new THREE.CylinderGeometry(0.7, 0.78, 0.22, 16), 0.11);
+      addWithOutline(new THREE.CylinderGeometry(0.56, 0.68, 0.16, 16), 0.28);
+      addWithOutline(new THREE.CylinderGeometry(0.36, 0.5, 0.6, 14), 0.62);
 
-      if (type === 'P') { // Peão
-        add(new THREE.CylinderGeometry(0.4, 0.36, 0.12, 14), 0.96);
-        add(new THREE.SphereGeometry(0.42, 14, 14), 1.34);
-      } else if (type === 'R') { // Torre
-        add(new THREE.CylinderGeometry(0.5, 0.42, 0.7, 14), 1.05);
-        add(new THREE.CylinderGeometry(0.6, 0.55, 0.4, 12), 1.55);
-      } else if (type === 'N') { // Cavalo
-        add(new THREE.BoxGeometry(0.42, 0.78, 0.75), 1.25);
-        add(new THREE.SphereGeometry(0.35, 12, 12), 1.55, 0.8, 1.2);
-      } else if (type === 'B') { // Bispo
-        add(new THREE.CylinderGeometry(0.44, 0.34, 0.75, 14), 1.15);
-        add(new THREE.SphereGeometry(0.4, 14, 14), 1.6, 0.8, 1.0);
-        add(new THREE.SphereGeometry(0.12, 10, 10), 2.05);
-      } else if (type === 'Q') { // Rainha
-        add(new THREE.CylinderGeometry(0.46, 0.36, 0.95, 16), 1.25);
-        add(new THREE.CylinderGeometry(0.62, 0.32, 0.38, 16), 1.85);
-        add(new THREE.SphereGeometry(0.16, 12, 12), 2.12);
-      } else if (type === 'K') { // Rei
-        add(new THREE.CylinderGeometry(0.5, 0.38, 1.15, 16), 1.35);
-        add(new THREE.CylinderGeometry(0.62, 0.46, 0.38, 16), 1.95);
-        add(new THREE.BoxGeometry(0.12, 0.42, 0.12), 2.3);
-        add(new THREE.BoxGeometry(0.34, 0.12, 0.12), 2.34);
+      if (type === 'P') {
+        addWithOutline(new THREE.CylinderGeometry(0.4, 0.36, 0.12, 14), 0.96);
+        addWithOutline(new THREE.SphereGeometry(0.42, 14, 14), 1.34);
+      } else if (type === 'R') {
+        addWithOutline(new THREE.CylinderGeometry(0.5, 0.42, 0.7, 14), 1.05);
+        addWithOutline(new THREE.CylinderGeometry(0.6, 0.55, 0.4, 12), 1.55);
+      } else if (type === 'N') {
+        addWithOutline(new THREE.BoxGeometry(0.42, 0.78, 0.75), 1.25);
+        addWithOutline(new THREE.SphereGeometry(0.35, 12, 12), 1.55, 0.8, 1.2);
+      } else if (type === 'B') {
+        addWithOutline(new THREE.CylinderGeometry(0.44, 0.34, 0.75, 14), 1.15);
+        addWithOutline(new THREE.SphereGeometry(0.4, 14, 14), 1.6, 0.8, 1.0);
+        addWithOutline(new THREE.SphereGeometry(0.12, 10, 10), 2.05);
+      } else if (type === 'Q') {
+        addWithOutline(new THREE.CylinderGeometry(0.46, 0.36, 0.95, 16), 1.25);
+        addWithOutline(new THREE.CylinderGeometry(0.62, 0.32, 0.38, 16), 1.85);
+        addWithOutline(new THREE.SphereGeometry(0.16, 12, 12), 2.12);
+      } else if (type === 'K') {
+        addWithOutline(new THREE.CylinderGeometry(0.5, 0.38, 1.15, 16), 1.35);
+        addWithOutline(new THREE.CylinderGeometry(0.62, 0.46, 0.38, 16), 1.95);
+        addWithOutline(new THREE.BoxGeometry(0.12, 0.42, 0.12), 2.3);
+        addWithOutline(new THREE.BoxGeometry(0.34, 0.12, 0.12), 2.34);
       }
 
       return group;
     }
 
     function renderAllPieces() {
-      // Limpa todas as peças do grupo
       while (piecesGroup.children.length > 0) {
         piecesGroup.remove(piecesGroup.children[0]);
       }
 
-      // Constrói todas as peças existentes no estado lógico
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           const piece = boardState[r][c];
@@ -967,7 +1094,7 @@
       }
     }
 
-    // Anéis Luminosos Azuis Neon
+    // Anéis Luminosos no Chão
     function renderHighlights() {
       clearHighlights();
 
@@ -1028,14 +1155,17 @@
       const piece = boardState[r][c];
       const isMyPiece = piece && (isLocal ? piece.color === currentTurn : piece.color === myColor);
 
+      // 1. Clicou na peça própria
       if (isMyPiece) {
         selectedSquare = { r, c };
-        validMoves = getValidMoves(r, c);
+        // Retorna APENAS movimentos estritamente legais (impossível perder o Rei)
+        validMoves = getStrictLegalMoves(r, c);
         renderHighlights();
         sfx.playMove();
         return;
       }
 
+      // 2. Clicou em casa de destino
       if (selectedSquare) {
         const isValid = validMoves.some(m => m.r === r && m.c === c);
         if (isValid) {
